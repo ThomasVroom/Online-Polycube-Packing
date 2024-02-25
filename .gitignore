@@ -9,6 +9,9 @@ __pycache__/
 # VS Code
 .vscode/
 
+# old code
+Online-3D-BPP-PCT/
+
 # Distribution / packaging
 .Python
 build/
