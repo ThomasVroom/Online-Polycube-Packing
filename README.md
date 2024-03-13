@@ -17,7 +17,7 @@ Furthermore, [Zhao et al. (2022)](https://openreview.net/forum?id=bfuGjlCwAq) al
 The goal of this thesis is to take the framework of PCT combined with DRL, and to extend it to online 3DIBPP.
 
 ## Dependencies
-...
+See `requirements.txt`.
 
 ## Usage
 ...
