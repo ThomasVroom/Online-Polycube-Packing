@@ -1,27 +1,26 @@
+from graphics.colormap import ColorMap
 import open3d as o3d
 import numpy as np
 import time
-from graphics.colormap import ColorMap
 
 class Visualizer:
 
-    def __init__(self, container=[10,10,10], voxel_size=0.05):
+    def __init__(self, dim, voxel_size=0.05):
         '''
         Create a visualizer object that can visualize the packing space.
 
         Parameters
         ----------
-            `container` : 3-dimensional integer vector, optional
+            `dim` : 3-dimensional tuple
                 the dimensions of the container.
-                format: `[width, height, depth]`
             `voxel_size` : float, optional
                 the mesh size of each voxel.
         '''
 
         # set the container dimensions
-        self.width = container[0]
-        self.height = container[1]
-        self.depth = container[2]
+        self.width = dim[0]
+        self.height = dim[1]
+        self.depth = dim[2]
         self.voxel_size = voxel_size
         self.started = False
 
@@ -75,8 +74,8 @@ class Visualizer:
         self.w.reset_camera_to_default()
 
         # start rendering
-        self.started = True
         o3d.visualization.gui.Application.instance.add_window(self.w)
+        self.started = True # this might crash if await_start checks before the next line, but that margin is very small
         o3d.visualization.gui.Application.instance.run()
 
     def await_start(self, timeout=10):
@@ -96,25 +95,19 @@ class Visualizer:
 
     def update(self, container):
         '''
-        Update the visualizer with the new container.
-        All non-zero elements are considered as packed and will be drawn in different colors.
+        Update the visualizer based on a container.
 
         Parameters
         ----------
-            `container` : 3-dimensional matrix
+            `container` : `Container`
                 the packing space.
         '''
-
-        # verify container dimensions
-        assert container.shape[0] == self.width, f'{container.shape[0]} != {self.width}'
-        assert container.shape[1] == self.height, f'{container.shape[1]} != {self.height}'
-        assert container.shape[2] == self.depth, f'{container.shape[2]} != {self.depth}'
 
         # assert gui is ready
         assert self.started, 'visualizer was not started.'
 
         # reshape the array into (N, 3) form (only selects elements that are not 0)
-        points = np.argwhere(container)
+        points = np.argwhere(container.matrix)
 
         # create a point cloud from the points
         pcd = o3d.geometry.PointCloud()
@@ -122,7 +115,7 @@ class Visualizer:
         pcd.translate([self.voxel_size/2, self.voxel_size/2, self.voxel_size/2]) # center w.r.t. line set
 
         # color all voxels
-        colors = [self.c.get_color(container[i, j, k]) for i, j, k in points]
+        colors = [self.c.get_color(container.matrix[i, j, k]) for i, j, k in points]
         pcd.colors = o3d.utility.Vector3dVector(colors)
 
         # create a voxel grid from the point cloud

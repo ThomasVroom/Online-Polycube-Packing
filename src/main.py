@@ -1,20 +1,20 @@
 from graphics import visualizer
-from shapes import random_polyomino, POLYOMINOES, ADJUSTED_PROB
-import numpy as np
+from shapes.shape_generator import ShapeGenerator
+from shapes.container import Container
 from threading import Thread
 
 if __name__ == '__main__':
-    vis = visualizer.Visualizer()
 
-    # create random shape
-    A = random_polyomino(POLYOMINOES, ADJUSTED_PROB)
-    container = np.zeros((10, 10, 10))
-    container[:A.shape[0],:A.shape[1],:A.shape[2]] = A
-
-    # add the container to the visualizer
+    c = Container(10, 10, 10)
+    vis = visualizer.Visualizer(c.get_dimensions())
+    g = ShapeGenerator(upper_bound=5)
+    
+    p = g.get_random_polycube()
+    if c.fit(p, (0, 0, 0)):
+        c.add(p, (0, 0, 0))
+    
     def add_container():
         vis.await_start()
-        vis.update(container)
+        vis.update(c)
     Thread(target=add_container).start()
-
     vis.start()
