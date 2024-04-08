@@ -33,6 +33,17 @@ class Container:
         '''
         
         return (self.width, self.height, self.depth)
+    
+    def get_ids(self):
+        '''
+        Get the unique ids of the shapes in the container.
+        
+        Returns
+        -------
+            list : the unique ids of the shapes in the container.
+        '''
+        
+        return np.unique(self.matrix)[1:]
 
     def fit(self, shape, position):
         '''
@@ -61,6 +72,14 @@ class Container:
         if position[2] + shape_depth > self.depth:
             return False
         
+        # check for overlap      
+        mx = np.ma.masked_array(self.matrix[position[0]:position[0] + shape_width,
+                                            position[1]:position[1] + shape_height,
+                                            position[2]:position[2] + shape_depth],
+                                            mask=(shape.matrix == 0))
+        if np.any(mx):
+            return False
+        
         return True
     
     def add(self, shape, position):
@@ -79,8 +98,12 @@ class Container:
         
         # get the dimensions of the shape
         shape_width, shape_height, shape_depth = shape.matrix.shape
+
+        # check if the id is already taken
+        while np.isin(shape.id, self.matrix):
+            shape.increment_id()
         
         # add the shape to the container
         self.matrix[position[0]:position[0] + shape_width,
                     position[1]:position[1] + shape_height,
-                    position[2]:position[2] + shape_depth] = shape.matrix
+                    position[2]:position[2] + shape_depth] += shape.matrix

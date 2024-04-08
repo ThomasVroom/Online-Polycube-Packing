@@ -93,7 +93,7 @@ class Visualizer:
             if time.time() - start_time > timeout:
                 raise TimeoutError('visualizer did not start.')
 
-    def update(self, container):
+    def update(self, container, labels=True):
         '''
         Update the visualizer based on a container.
 
@@ -101,6 +101,8 @@ class Visualizer:
         ----------
             `container` : `Container`
                 the packing space.
+            `labels` : bool, optional
+                whether to add the polycube ids as labels to the visualizer.
         '''
 
         # assert gui is ready
@@ -120,7 +122,15 @@ class Visualizer:
 
         # create a voxel grid from the point cloud
         voxel_grid = o3d.geometry.VoxelGrid.create_from_point_cloud(pcd, voxel_size=self.voxel_size)
-        
+
+        # add labels
+        self.w.clear_3d_labels()
+        if labels:
+            for id in container.get_ids():
+                points = np.argwhere(container.matrix == id)
+                mean = np.mean(np.asarray(points), axis=0) * self.voxel_size
+                self.w.add_3d_label(mean + [0.5 * self.voxel_size, 0, 0.5 * self.voxel_size], str(int(id)))
+
         # update the visualizer
         self.w.remove_geometry('voxel_grid')
         self.w.add_geometry('voxel_grid', voxel_grid)
