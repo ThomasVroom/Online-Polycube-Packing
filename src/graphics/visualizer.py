@@ -70,6 +70,22 @@ class Visualizer:
         self.w.add_geometry('voxel_grid', self.line_set, is_visible=False)
         self.w.add_geometry('container', self.line_set)
         self.w.show_axes = True
+        self.w.show_settings = False
+
+        # labels
+        self.labels = []
+        self.labels_visible = True
+
+        # register actions
+        def toggle_labels(vis):
+            if self.labels_visible: # labels are visible, hide them
+                vis.clear_3d_labels()
+                self.labels_visible = False
+            else: # labels are hidden, show them
+                for label, id in self.labels:
+                    vis.add_3d_label(label, str(int(id)))
+                self.labels_visible = True
+        self.w.add_action('toggle labels', toggle_labels)
 
         # reset camera
         self.w.reset_camera_to_default()
@@ -94,7 +110,7 @@ class Visualizer:
             if time.time() - start_time > timeout:
                 raise TimeoutError('visualizer did not start.')
 
-    def update(self, container, labels=True):
+    def update(self, container):
         '''
         Update the visualizer based on a container.
 
@@ -102,8 +118,6 @@ class Visualizer:
         ----------
             `container` : `Container`
                 the packing space.
-            `labels` : bool, optional
-                whether to add the polycube ids as labels to the visualizer.
         '''
 
         # assert gui is ready
@@ -124,13 +138,15 @@ class Visualizer:
         # create a voxel grid from the point cloud
         voxel_grid = o3d.geometry.VoxelGrid.create_from_point_cloud(pcd, voxel_size=self.voxel_size)
 
-        # add labels
-        self.w.clear_3d_labels()
-        if labels:
-            for id in container.get_ids():
-                points = np.argwhere(container.matrix == id)
-                mean = np.mean(np.asarray(points), axis=0) * self.voxel_size
-                self.w.add_3d_label(mean + [0.5 * self.voxel_size, 0, 0.5 * self.voxel_size], str(int(id)))
+        # update labels
+        for id in container.get_ids():
+            points = np.argwhere(container.matrix == id)
+            mean = np.mean(np.asarray(points), axis=0) * self.voxel_size
+            self.labels.append((mean + [0.5 * self.voxel_size, 0, 0.5 * self.voxel_size], id))
+        if self.labels_visible:
+            self.w.clear_3d_labels()
+            for label, id in self.labels:
+                self.w.add_3d_label(label, str(int(id)))
 
         # update the visualizer
         self.w.remove_geometry('voxel_grid')
