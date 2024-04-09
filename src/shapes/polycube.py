@@ -15,6 +15,17 @@ class Polycube:
         # set the polycube
         self.matrix = matrix
         self.id = np.amax(matrix).astype(int)
+    
+    def __str__(self):
+        '''
+        Get the string representation of the polycube.
+        
+        Returns
+        -------
+            str : the string representation of the polycube.
+        '''
+        
+        return '---------------\n' + str(self.matrix) + '\n---------------'
 
     def increment_id(self):
         '''

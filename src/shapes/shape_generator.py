@@ -35,18 +35,42 @@ class ShapeGenerator:
             # decrement the upper bound
             upper_bound -= 1
 
-    def get_random_polycube(self):
+    def get_random_polycube(self, idx=None):
         '''
         Get a random polycube.
 
+        Parameters
+        ----------
+            `idx` : int, optional
+                the index of the polycube to get. If None, a random polycube is returned.
+        
         Returns
         -------
             `Polycube` : a Polycube object
-                a randomly generated polycube.
+                a random polycube.
         '''
 
-        # get a random index
-        idx = np.random.randint(0, len(self.polycubes))
+        if idx is None:
+            # get a random index
+            idx = np.random.randint(0, len(self.polycubes))
 
         # get the corresponding polycube
         return Polycube(self.polycubes[idx] * (idx + 1))
+    
+    def create_sequence(self, length):
+        '''
+        Create a sequence of polycubes.
+
+        Parameters
+        ----------
+            `length` : int
+                the length of the sequence.
+        
+        Returns
+        -------
+            `iter` : an iterator of random Polycube objects
+                a sequence of polycubes.
+        '''
+
+        # create the sequence
+        return iter([self.get_random_polycube() for _ in range(length)])

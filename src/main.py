@@ -9,7 +9,7 @@ if __name__ == '__main__':
     vis = visualizer.Visualizer(c.get_dimensions())
     g = ShapeGenerator(upper_bound=3)
     
-    p1 = g.get_random_polycube()
+    p1 = g.get_random_polycube(1)
     p = p1.get_rotations()
     for i, p0 in enumerate(p):
         c.add(p0, ((i * 3) % 9, int(i / 9) * 3, int(i / 3) * 3 % 9))
