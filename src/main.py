@@ -2,20 +2,19 @@ from graphics import visualizer
 from shapes.shape_generator import ShapeGenerator
 from shapes.container import Container
 from threading import Thread
+from agents.random_agent import RandomAgent
 
 if __name__ == '__main__':
 
-    c = Container(10, 10, 10)
+    # set up environment
+    c = Container(5, 5, 5)
     vis = visualizer.Visualizer(c.get_dimensions())
-    g = ShapeGenerator(upper_bound=3)
-    
-    p1 = g.get_random_polycube(1)
-    p = p1.get_rotations()
-    for i, p0 in enumerate(p):
-        c.add(p0, ((i * 3) % 9, int(i / 9) * 3, int(i / 3) * 3 % 9))
-    
-    def add_container():
-        vis.await_start()
-        vis.update(c)
-    Thread(target=add_container).start()
+    g = ShapeGenerator(upper_bound=5)
+    seq = g.create_sequence(50)
+
+    # create a random agent
+    agent = RandomAgent(vis)
+
+    # start the packing
+    Thread(target=agent.pack, args=(c, seq)).start()
     vis.start()

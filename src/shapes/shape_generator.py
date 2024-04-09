@@ -1,6 +1,7 @@
 from shapes.polycube import Polycube
 import numpy as np
 import os
+import json
 
 class ShapeGenerator:
 
@@ -18,6 +19,7 @@ class ShapeGenerator:
         # check if the upper bound is valid
         assert upper_bound >= 3, "The minimum size of the polycube is 3."
         assert upper_bound <= 10, "The maximum size of the polycube is 10."
+        self.upper_bound = upper_bound
 
         # empty list to store the polycubes
         self.polycubes = np.array([])
@@ -57,7 +59,7 @@ class ShapeGenerator:
         # get the corresponding polycube
         return Polycube(self.polycubes[idx] * (idx + 1))
     
-    def create_sequence(self, length):
+    def create_sequence(self, length, file_path=None):
         '''
         Create a sequence of polycubes.
 
@@ -65,12 +67,45 @@ class ShapeGenerator:
         ----------
             `length` : int
                 the length of the sequence.
+            `file_path` : str, optional
+                the path to save the sequence to.
         
         Returns
         -------
-            `iter` : an iterator of random Polycube objects
+            `list` : a list of random Polycube objects
                 a sequence of polycubes.
         '''
 
-        # create the sequence
-        return iter([self.get_random_polycube() for _ in range(length)])
+        # create a random sequence
+        if file_path is None:
+            return [self.get_random_polycube() for _ in range(length)]
+
+        # create a random sequence and save it to a file
+        seq = np.random.choice(range(len(self.polycubes)), length).tolist()
+        with open(file_path, 'w') as f:
+            json.dump({'upper_bound':self.upper_bound, 'length':length, 'sequence':seq}, f)
+
+        # return the sequence from the file
+        return self.load_sequence(file_path)
+    
+    def load_sequence(self, file_path):
+        '''
+        Load a sequence of polycubes from a file.
+
+        Parameters
+        ----------
+            `file_path` : str
+                the path to the file.
+        
+        Returns
+        -------
+            `list` : a list of Polycube objects
+                a sequence of polycubes.
+        '''
+
+        # load the sequence
+        with open(file_path, 'r') as f:
+            seq = json.load(f)['sequence']
+
+        # convert the sequence to polycubes
+        return [self.get_random_polycube(idx) for idx in seq]

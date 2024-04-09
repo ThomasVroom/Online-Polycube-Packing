@@ -29,7 +29,7 @@ class Visualizer:
 
         # line set
         points = [
-            [0, 0, 0],
+            [0, 0, 0], # unused because of axes
             [self.width * voxel_size, 0, 0],
             [0, self.height * voxel_size, 0],
             [self.width * voxel_size, self.height * voxel_size, 0],
@@ -39,7 +39,7 @@ class Visualizer:
             [self.width * voxel_size, self.height * voxel_size, self.depth * voxel_size]
         ]
         lines = [
-            [0, 1],[0, 2],[1, 3],[2, 3],[4, 5],[4, 6],[5, 7],[6, 7],[0, 4],[1, 5],[2, 6],[3, 7]
+            [1, 3],[2, 3],[4, 5],[4, 6],[5, 7],[6, 7],[1, 5],[2, 6],[3, 7]
         ]
         self.line_set = o3d.geometry.LineSet(
             points=o3d.utility.Vector3dVector(points),
@@ -69,6 +69,7 @@ class Visualizer:
         # add initial geometries
         self.w.add_geometry('voxel_grid', self.line_set, is_visible=False)
         self.w.add_geometry('container', self.line_set)
+        self.w.show_axes = True
 
         # reset camera
         self.w.reset_camera_to_default()
