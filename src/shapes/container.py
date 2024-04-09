@@ -2,7 +2,7 @@ import numpy as np
 
 class Container:
 
-    def __init__(self, width, height, depth):
+    def __init__(self, width, height, depth, constraints=None):
         '''
         Create a container object.
         
@@ -14,6 +14,8 @@ class Container:
                 the height of the container.
             `depth` : int
                 the depth of the container.
+            `constraints` : list of constraints, optional
+                a list of constraints that the container must satisfy.
         '''
         
         # set the container
@@ -21,6 +23,7 @@ class Container:
         self.height = height
         self.depth = depth
         self.matrix = np.zeros((width, height, depth))
+        self.constraints = [] if constraints is None else constraints
 
     def get_dimensions(self):
         '''
@@ -80,6 +83,11 @@ class Container:
         if np.any(mx):
             return False
         
+        # check if the constraints are satisfied
+        for constraint in self.constraints:
+            if not constraint.is_satisfied(self):
+                return False
+        
         return True
     
     def add(self, shape, position):
@@ -107,3 +115,7 @@ class Container:
         self.matrix[position[0]:position[0] + shape_width,
                     position[1]:position[1] + shape_height,
                     position[2]:position[2] + shape_depth] += shape.matrix
+        
+        # apply constraints
+        for constraint in self.constraints:
+            constraint.apply(self)

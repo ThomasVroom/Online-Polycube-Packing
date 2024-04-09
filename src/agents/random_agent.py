@@ -1,17 +1,7 @@
 import numpy as np
+from agents.agent import Agent
 
-class RandomAgent:
-
-    def __init__(self, visualizer):
-        '''
-        Create a random agent that can pack polycubes into a container.
-
-        Parameters
-        ----------
-            `visualizer` : Visualizer
-                the visualizer object.
-        '''
-        self.vis = visualizer
+class RandomAgent(Agent):
 
     def pack(self, container, sequence, max_tries=100):
         '''
