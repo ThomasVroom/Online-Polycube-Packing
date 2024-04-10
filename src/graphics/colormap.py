@@ -4,7 +4,7 @@ class ColorMap:
 
     def __init__(self):
         '''
-        Create a color map object that can be used to generate random colors.
+        Create a color map object that maps integers to colors.
         '''
 
         # empty map
