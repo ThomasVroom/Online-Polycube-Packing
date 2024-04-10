@@ -1,4 +1,4 @@
-# Online-3D-IBPP
+# Online-Polycube-Packing
 
 ...
 
