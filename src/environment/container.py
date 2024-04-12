@@ -48,25 +48,26 @@ class Container:
         
         return np.unique(self.matrix)[1:]
 
-    def fit(self, shape, position):
+    def add(self, shape, position):
         '''
-        Check if a shape fits in the container.
+        Add a shape to the container.
         
         Parameters
         ----------
             `shape` : `Polycube`
-                the shape to be checked.
+                the shape to be added.
             `position` : 3-dimensional integer vector
                 the position of the shape.
-        
+            
         Returns
         -------
-            bool : True if the shape fits in the container, False otherwise.
+            bool : True if the shape was successfully added, otherwise False 
+            (in this case the container will not be modified).
         '''
         
         # get the dimensions of the shape
         shape_width, shape_height, shape_depth = shape.matrix.shape
-        
+
         # check if the shape fits in the container
         if position[0] + shape_width > self.width:
             return False
@@ -82,30 +83,6 @@ class Container:
                                             mask=(shape.matrix == 0))
         if np.any(mx):
             return False
-        
-        # check if the constraints are satisfied
-        for constraint in self.constraints:
-            if not constraint.is_satisfied(self):
-                return False
-        
-        return True
-    
-    def add(self, shape, position):
-        '''
-        Add a shape to the container.
-        Note that this method does not check if the shape fits in the container.
-        It is recommended to first use the `fit` method before adding a shape.
-        
-        Parameters
-        ----------
-            `shape` : `Polycube`
-                the shape to be added.
-            `position` : 3-dimensional integer vector
-                the position of the shape.
-        '''
-        
-        # get the dimensions of the shape
-        shape_width, shape_height, shape_depth = shape.matrix.shape
 
         # check if the id is already taken
         while np.isin(shape.id, self.matrix):
@@ -116,6 +93,17 @@ class Container:
                     position[1]:position[1] + shape_height,
                     position[2]:position[2] + shape_depth] += shape.matrix
         
+        # check if the constraints are satisfied
+        for constraint in self.constraints:
+            if not constraint.is_satisfied(self):
+                # remove the shape from the container
+                self.matrix[position[0]:position[0] + shape_width,
+                            position[1]:position[1] + shape_height,
+                            position[2]:position[2] + shape_depth] -= shape.matrix
+                return False
+        
         # apply constraints
         for constraint in self.constraints:
             constraint.apply(self)
+        
+        return True

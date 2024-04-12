@@ -17,14 +17,11 @@ class RandomAgent(Agent):
                 the maximum number of tries to fit a polycube before giving up.
         '''
 
-        # state variables
-        no_more_options = False
-        options_tried = 0
-
         # await start signal
         self.vis.await_start()
 
         # loop until sequence is empty or agent exhausted all options
+        no_more_options = False
         while not (len(sequence) <= 0 or no_more_options):
             # get the next polycube
             p = sequence.pop(0)
@@ -43,8 +40,7 @@ class RandomAgent(Agent):
                 print(f'Polycube {p.id} : Attempt {options_tried + 1} at ({x}, {y}, {z})...', end='\r')
 
                 # try to fit the polycube
-                if container.fit(p, (x, y, z)):
-                    container.add(p, (x, y, z))
+                if container.add(p, (x, y, z)):
                     break
 
                 # check if all options are exhausted

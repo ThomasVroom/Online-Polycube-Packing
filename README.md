@@ -1,15 +1,16 @@
 # Online-Polycube-Packing
-
 ...
 
 ## Introduction
-
 ...
 
 ## Dependencies
 See `requirements.txt`.
 
 ## Usage
+...
+
+## Customization
 ...
 
 ## Acknowledgements
