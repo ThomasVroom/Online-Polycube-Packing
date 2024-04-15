@@ -1,4 +1,4 @@
-from graphics.colormap import ColorMap
+from src.graphics.colormap import ColorMap
 import open3d as o3d
 import numpy as np
 import time

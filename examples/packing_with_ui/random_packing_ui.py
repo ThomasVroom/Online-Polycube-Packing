@@ -1,7 +1,7 @@
-from graphics.visualizer import Visualizer
-from environment.shapes import ShapeGenerator
-from environment.container import Container
-from agents.random_agent import RandomAgent
+from src.graphics.visualizer import Visualizer
+from src.environment.shapes import ShapeGenerator
+from src.environment.container import Container
+from src.agents.random_agent import RandomAgent
 
 if __name__ == '__main__':
 

@@ -1,4 +1,4 @@
-from constraints.constraint import Constraint
+from src.constraints.constraint import Constraint
 import numpy as np
 
 class Gravity(Constraint):
