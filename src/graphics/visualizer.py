@@ -5,24 +5,29 @@ import time
 
 class Visualizer:
 
-    def __init__(self, dim, voxel_size=0.05):
+    def __init__(self, container, voxel_size=0.05, agent_sequence_pair=(None, None)):
         '''
         Create a visualizer object that can visualize the packing space.
 
         Parameters
         ----------
-            `dim` : 3-dimensional tuple
-                the dimensions of the container.
+            `container` : `Container`
+                the container object that should be visualized.
             `voxel_size` : float, optional
                 the mesh size of each voxel.
+            `agent_sequence_pair` : (`Agent`, list[`Polycube`]), optional
+                optional agent and sequence reference for controlling the packing through the UI.
         '''
 
         # set the container dimensions
-        self.width = dim[0]
-        self.height = dim[1]
-        self.depth = dim[2]
+        self.width, self.height, self.depth = container.get_dimensions()
+        self.container = container
         self.voxel_size = voxel_size
         self.started = False
+
+        # util for controlling the packing
+        self.agent, self.sequence = agent_sequence_pair
+        self.finished_packing = False
 
         # create a color map
         self.c = ColorMap()
@@ -72,11 +77,8 @@ class Visualizer:
         self.w.show_axes = True
         self.w.show_settings = False
 
-        # labels
-        self.labels = []
+        # action for toggling labels
         self.labels_visible = True
-
-        # register actions
         def toggle_labels(vis):
             if self.labels_visible: # labels are visible, hide them
                 vis.clear_3d_labels()
@@ -86,6 +88,24 @@ class Visualizer:
                     vis.add_3d_label(label, str(int(id)))
                 self.labels_visible = True
         self.w.add_action('toggle labels', toggle_labels)
+
+        # actions for controlling the packing
+        if self.agent is not None:
+            def next_shape(_):
+                if not self.finished_packing:
+                    if len(self.sequence) > 0:
+                        self.finished_packing = not self.agent.step(self.sequence.pop())
+                        self.update()
+                    else:
+                        print('No more shapes to pack.')
+                else:
+                        print('No more shapes can be packed.')
+            def reset_container(_):
+                self.container.reset()
+                self.finished_packing = False
+                self.update()
+            self.w.add_action('reset container', reset_container)
+            self.w.add_action('next shape', next_shape)
 
         # reset camera
         self.w.reset_camera_to_default()
@@ -110,21 +130,17 @@ class Visualizer:
             if time.time() - start_time > timeout:
                 raise TimeoutError('visualizer did not start.')
 
-    def update(self, container):
+    def update(self):
         '''
-        Update the visualizer based on a container.
+        Update the visualizer based on the current container.
 
-        Parameters
-        ----------
-            `container` : `Container`
-                the packing space.
         '''
 
         # assert gui is ready
         assert self.started, 'visualizer was not started.'
 
         # reshape the array into (N, 3) form (only selects elements that are not 0)
-        points = np.argwhere(container.matrix)
+        points = np.argwhere(self.container.matrix)
 
         # create a point cloud from the points
         pcd = o3d.geometry.PointCloud()
@@ -132,15 +148,16 @@ class Visualizer:
         pcd.translate([self.voxel_size/2, self.voxel_size/2, self.voxel_size/2]) # center w.r.t. line set
 
         # color all voxels
-        colors = [self.c.get_color(container.matrix[i, j, k]) for i, j, k in points]
+        colors = [self.c.get_color(self.container.matrix[i, j, k]) for i, j, k in points]
         pcd.colors = o3d.utility.Vector3dVector(colors)
 
         # create a voxel grid from the point cloud
         voxel_grid = o3d.geometry.VoxelGrid.create_from_point_cloud(pcd, voxel_size=self.voxel_size)
 
         # update labels
-        for id in container.get_ids():
-            points = np.argwhere(container.matrix == id)
+        self.labels = []
+        for id in self.container.get_ids():
+            points = np.argwhere(self.container.matrix == id)
             mean = np.mean(np.asarray(points), axis=0) * self.voxel_size
             self.labels.append((mean + [0.5 * self.voxel_size, 0, 0.5 * self.voxel_size], id))
         if self.labels_visible:

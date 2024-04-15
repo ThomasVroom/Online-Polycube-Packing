@@ -3,52 +3,48 @@ from agents.agent import Agent
 
 class RandomAgent(Agent):
 
-    def pack(self, container, sequence, max_tries=100):
+    def __init__(self, container, max_tries=100):
         '''
-        Pack a sequence of polycubes into the container.
+        Create a random agent that can pack polycubes into a container.
 
         Parameters
         ----------
             `container` : Container
                 the container object.
-            `sequence` : list
-                the sequence of polycubes to pack (will be mutated!).
             `max_tries` : int, optional
                 the maximum number of tries to fit a polycube before giving up.
         '''
 
-        # await start signal
-        self.vis.await_start()
+        self.max_tries = max_tries
+        super().__init__(container)
 
-        # loop until sequence is empty or agent exhausted all options
-        no_more_options = False
-        while not (len(sequence) <= 0 or no_more_options):
-            # get the next polycube
-            p = sequence.pop(0)
-            rotations = p.get_rotations()
+    def step(self, shape):
+        # get all the rotations of the shape
+        rotations = shape.get_rotations()
+
+        # state variables
+        options_tried = 0
+        successful_fit = False
+
+        # try to add the polycube to the container
+        while not (successful_fit or options_tried >= self.max_tries):
+            # select a random rotation
+            p = np.random.choice(rotations)
+
+            # get random position
+            x = np.random.randint(0, self.dimensions[0] - 1)
+            y = np.random.randint(0, self.dimensions[1] - 1)
+            z = np.random.randint(0, self.dimensions[2] - 1)
+            print(f'Polycube {p.id} : Attempt {options_tried + 1} at ({x}, {y}, {z})...', end='\r')
+
+            # try to fit the polycube
+            if self.container.add(p, (x, y, z)):
+                successful_fit = True
             
-            # try to add the polycube to the container
-            options_tried = 0
-            while not no_more_options:
-                # select a random rotation
-                p = np.random.choice(rotations)
+            # increment options tried
+            options_tried += 1
 
-                # get random position
-                x = np.random.randint(0, container.get_dimensions()[0] - 1)
-                y = np.random.randint(0, container.get_dimensions()[1] - 1)
-                z = np.random.randint(0, container.get_dimensions()[2] - 1)
-                print(f'Polycube {p.id} : Attempt {options_tried + 1} at ({x}, {y}, {z})...', end='\r')
-
-                # try to fit the polycube
-                if container.add(p, (x, y, z)):
-                    break
-
-                # check if all options are exhausted
-                options_tried += 1
-                if options_tried >= max_tries:
-                    no_more_options = True
-            print('', end='\n', flush=True)
-        
-        # update the visualizer
-        self.vis.update(container)
-        print(f'Number fitted: {len(container.get_ids())}')
+        # print the result
+        print('', end='\n', flush=True)
+        print(f'Number fitted: {len(self.container.get_ids())}')
+        return successful_fit

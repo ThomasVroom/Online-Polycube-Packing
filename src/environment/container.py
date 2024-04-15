@@ -48,6 +48,12 @@ class Container:
         
         return np.unique(self.matrix)[1:]
 
+    def reset(self):
+        '''
+        Reset the container to a blank state.
+        '''
+        self.matrix = np.zeros(self.get_dimensions())
+
     def add(self, shape, position):
         '''
         Add a shape to the container.
