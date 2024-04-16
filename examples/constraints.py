@@ -3,6 +3,7 @@ from src.environment.shapes import ShapeGenerator
 from src.environment.container import Container
 from src.agents.random_agent import RandomAgent
 from src.constraints.gravity import Gravity
+from src.constraints.loadbalancing import LoadBalancing
 
 if __name__ == '__main__':
 

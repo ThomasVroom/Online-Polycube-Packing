@@ -96,7 +96,7 @@ class Container:
         
         # check if the constraints are satisfied
         for constraint in self.constraints:
-            if not constraint.is_satisfied(self):
+            if not constraint.is_satisfied(self.matrix):
                 # remove the shape from the container
                 self.matrix[position[0]:position[0] + shape_width,
                             position[1]:position[1] + shape_height,
@@ -142,7 +142,7 @@ class Container:
         
         # apply constraints
         for constraint in self.constraints:
-            constraint.apply(self)
+            constraint.apply(self.matrix)
         
         return True
 

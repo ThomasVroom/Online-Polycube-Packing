@@ -129,6 +129,7 @@ class Visualizer:
         while not self.started:
             if time.time() - start_time > timeout:
                 raise TimeoutError('visualizer did not start.')
+        time.sleep(0.1) # give some time for the visualizer to finish starting
 
     def update(self):
         '''

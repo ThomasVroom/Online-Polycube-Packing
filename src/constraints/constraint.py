@@ -3,26 +3,26 @@ from abc import ABC, abstractmethod
 class Constraint(ABC):
 
     @abstractmethod
-    def apply(self, container):
+    def apply(self, matrix):
         '''
-        Apply the constraint to the container.
+        Apply the constraint to the matrix.
         
         Parameters
         ----------
-            `container` : `Container`
-                the container to apply the constraint to.
-        '''        
+            `matrix` : `Matrix`
+                the matrix to apply the constraint to.
+        '''
         pass
 
     @abstractmethod
-    def is_satisfied(self, container):
+    def is_satisfied(self, matrix):
         '''
-        Check if the constraint is satisfied by the container.
+        Check if the constraint is satisfied by the matrix.
         
         Parameters
         ----------
-            `container` : `Container`
-                the container to check.
+            `matrix` : `Matrix`
+                the matrix to check the constraint against.
         
         Returns
         -------

@@ -5,7 +5,7 @@ class LoadBalancing(Constraint):
 
     def __init__(self, margin=1.0):
         '''
-        Create a constraint that checks if the load of the container is balanced.
+        Create a constraint that checks if the load of the matrix is balanced.
 
         Parameters
         ----------
@@ -14,28 +14,15 @@ class LoadBalancing(Constraint):
         '''
         self.margin = margin
 
-    def apply(self, container):
+    def apply(self, matrix):
         pass # not relevant
 
-    def is_satisfied(self, container):
-        '''
-        Check if the load of the container is balanced.
-        
-        Parameters
-        ----------
-            `container` : `Container`
-                the container to check.
-        
-        Returns
-        -------
-            bool : whether the constraint is satisfied.
-        '''
-        
-        # get the dimensions of the container
-        width, _, depth = container.get_dimensions()
+    def is_satisfied(self, matrix):
+        # get the dimensions of the matrix
+        width, _, depth = matrix.shape
 
-        # get the positions of the shapes in the container
-        blocks = np.argwhere(container.matrix)
+        # get the positions of the shapes in the matrix
+        blocks = np.argwhere(matrix)
 
         # if there are no blocks, the constraint is satisfied
         if len(blocks) == 0:

@@ -5,7 +5,7 @@ class Gravity(Constraint):
 
     def __init__(self, connected=True):
         '''
-        Create a constraint that applies gravity to the container.
+        Create a constraint that applies gravity to the matrix.
 
         Parameters
         ----------
@@ -14,21 +14,12 @@ class Gravity(Constraint):
         '''
         self.connected = connected
 
-    def apply(self, container):
-        '''
-        Apply the constraint to the container.
-
-        Parameters
-        ----------
-            `container` : `Container`
-                the container to apply the constraint to.
-        '''
-
-        # apply gravity to the container
+    def apply(self, matrix):
+        # apply gravity to the matrix
         if self.connected:
-            self.apply_connected_gravity(container.matrix)
+            self.apply_connected_gravity(matrix)
         else:
-            self.apply_disconnected_gravity(container.matrix)
+            self.apply_disconnected_gravity(matrix)
 
     def apply_connected_gravity(self, matrix):
         '''
@@ -91,5 +82,5 @@ class Gravity(Constraint):
                             matrix[x, h1, y] = 0
                             h1 -= 1
 
-    def is_satisfied(self, container):
+    def is_satisfied(self, matrix):
         return True # not relevant
