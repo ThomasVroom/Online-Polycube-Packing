@@ -21,5 +21,5 @@ class HeightMapMinimization(Heuristic):
         # calculate the filled area of the height map
         filled_area = np.count_nonzero(height_map)
 
-        # return the normalized percentage of filled area
+        # return the normalized percentage of filled area (inversed)
         return 1 - filled_area / height_map.size

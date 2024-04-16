@@ -7,7 +7,7 @@ class HAPE(Heuristic):
     '''
     
     def get_score(self, matrix):
-        # get the center of mass of the container
+        # get the center of mass of the matrix
         center_of_mass = np.mean(np.argwhere(matrix), axis=0)
         
         # return the normalized distance from the (vertical) CoM to the top of the container

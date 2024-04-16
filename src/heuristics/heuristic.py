@@ -5,9 +5,8 @@ class Heuristic(ABC):
     @abstractmethod
     def get_score(self, matrix):
         '''
-        Get the score of the container.
-        Range = [0, 1].
-        A higher score means a better container.
+        Get the normalized `[0, 1]` score of the matrix.
+        A higher score means a better matrix.
 
         Parameters
         ----------
@@ -17,6 +16,6 @@ class Heuristic(ABC):
         Returns
         -------
             `float`
-                the score of the container.
+                the score of the matrix.
         '''
         pass
