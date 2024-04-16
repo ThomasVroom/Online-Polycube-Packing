@@ -15,7 +15,7 @@ class Visualizer:
                 the container object that should be visualized.
             `voxel_size` : float, optional
                 the mesh size of each voxel.
-            `agent_sequence_pair` : (`Agent`, list[`Polycube`]), optional
+            `agent_sequence_pair` : (`Agent`, List[`Polycube`]), optional
                 optional agent and sequence reference for controlling the packing through the UI.
         '''
 

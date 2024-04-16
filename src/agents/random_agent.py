@@ -46,5 +46,4 @@ class RandomAgent(Agent):
 
         # print the result
         print('', end='\n', flush=True)
-        print(f'Number fitted: {len(self.container.get_ids())}')
         return successful_fit

@@ -53,24 +53,23 @@ class Container:
         Reset the container to a blank state.
         '''
         self.matrix = np.zeros(self.get_dimensions())
-
-    def add(self, shape, position):
+    
+    def fits(self, shape, position):
         '''
-        Add a shape to the container.
-        
+        Check if a shape fits in the container.
+
         Parameters
         ----------
             `shape` : `Polycube`
-                the shape to be added.
+                the shape to be checked.
             `position` : 3-dimensional integer vector
                 the position of the shape.
-            
+        
         Returns
         -------
-            bool : True if the shape was successfully added, otherwise False 
-            (in this case the container will not be modified).
+            bool : True if the shape fits in the container, otherwise False.
         '''
-        
+
         # get the dimensions of the shape
         shape_width, shape_height, shape_depth = shape.matrix.shape
 
@@ -89,10 +88,6 @@ class Container:
                                             mask=(shape.matrix == 0))
         if np.any(mx):
             return False
-
-        # check if the id is already taken
-        while np.isin(shape.id, self.matrix):
-            shape.increment_id()
         
         # add the shape to the container
         self.matrix[position[0]:position[0] + shape_width,
@@ -108,8 +103,100 @@ class Container:
                             position[2]:position[2] + shape_depth] -= shape.matrix
                 return False
         
+        # remove the shape from the container
+        self.matrix[position[0]:position[0] + shape_width,
+                    position[1]:position[1] + shape_height,
+                    position[2]:position[2] + shape_depth] -= shape.matrix
+        return True
+
+    def add(self, shape, position):
+        '''
+        Add a shape to the container.
+        
+        Parameters
+        ----------
+            `shape` : `Polycube`
+                the shape to be added.
+            `position` : 3-dimensional integer vector
+                the position of the shape.
+            
+        Returns
+        -------
+            bool : True if the shape was successfully added, otherwise False 
+            (in this case the container will not be modified).
+        '''
+
+        # check if the shape fits in the container
+        if not self.fits(shape, position):
+            return False
+        
+        # check if the id is already taken
+        while np.isin(shape.id, self.matrix):
+            shape.increment_id()
+
+        # add the shape to the container
+        shape_width, shape_height, shape_depth = shape.matrix.shape
+        self.matrix[position[0]:position[0] + shape_width,
+                    position[1]:position[1] + shape_height,
+                    position[2]:position[2] + shape_depth] += shape.matrix
+        
         # apply constraints
         for constraint in self.constraints:
             constraint.apply(self)
         
         return True
+
+    def get_feasible_mask(self, shape):
+        '''
+        Get a mask of the container where the shape can fit.
+
+        Parameters
+        ----------
+            `shape` : `Polycube`
+                the shape to be checked (locked rotation).
+        
+        Returns
+        -------
+            `np.ndarray` : a 3D mask of the container where the shape can fit.
+        '''
+
+        # create an empty copy of the container
+        mask = np.full(self.get_dimensions(), False, dtype=bool)
+        for x in range(self.width):
+            for y in range(self.height):
+                for z in range(self.depth):
+                    if self.fits(shape, (x, y, z)):
+                        mask[x, y, z] = True
+        return mask
+
+    def get_dummy_container(self, shape, position):
+        ''''
+        Get a copy of the container with the shape added.
+        Note that this copy does not have unique ids for the shapes.
+
+        Parameters
+        ----------
+            `shape` : `Polycube`
+                the shape to be added.
+            `position` : 3-dimensional integer vector
+                the position of the shape.
+        
+        Returns
+        -------
+            `np.ndarray` : a copy of the container with the shape added.
+        '''
+
+        # create a copy of the container
+        dummy_container = self.matrix.copy()
+
+        # add the shape to the container
+        shape_width, shape_height, shape_depth = shape.matrix.shape
+        dummy_container[position[0]:position[0] + shape_width,
+                        position[1]:position[1] + shape_height,
+                        position[2]:position[2] + shape_depth] += shape.matrix
+        
+        # apply constraints
+        for constraint in self.constraints:
+            constraint.apply(dummy_container)
+        
+        return dummy_container
