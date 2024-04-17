@@ -35,7 +35,7 @@ class RandomAgent(Agent):
             x = np.random.randint(0, self.dimensions[0] - 1)
             y = np.random.randint(0, self.dimensions[1] - 1)
             z = np.random.randint(0, self.dimensions[2] - 1)
-            print(f'Polycube {p.id} : Attempt {options_tried + 1} at ({x}, {y}, {z})...', end='\r')
+            print(f'polycube {p.id} : attempt {options_tried + 1} at ({x}, {y}, {z})...', end='\r')
 
             # try to fit the polycube
             if self.container.add(p, (x, y, z)):

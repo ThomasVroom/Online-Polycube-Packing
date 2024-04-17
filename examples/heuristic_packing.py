@@ -14,7 +14,10 @@ if __name__ == '__main__':
     c = Container(5, 5, 5, constraints=[])
     g = ShapeGenerator(upper_bound=5)
     seq = g.create_sequence(50)
-    agent = GreedyAgent(c, heuristics=[HAPE(), BLBF(), HeightMapMinimization()])
+    agent = GreedyAgent(c, heuristics=[HeightMapMinimization(axis=0),
+                                       HeightMapMinimization(axis=1),
+                                       HeightMapMinimization(axis=2),
+                                       HAPE()])
 
     # start the UI
     vis = Visualizer(c, agent_sequence_pair=(agent, seq))

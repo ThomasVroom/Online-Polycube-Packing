@@ -1,4 +1,5 @@
 from src.graphics.colormap import ColorMap
+import src.graphics.text_colors as tc
 import open3d as o3d
 import numpy as np
 import time
@@ -170,3 +171,4 @@ class Visualizer:
         self.w.remove_geometry('voxel_grid')
         self.w.add_geometry('voxel_grid', voxel_grid)
         self.w.post_redraw()
+        print(f'{tc.CYELLOW2}total fitted: {len(self.container.get_ids())}{tc.CEND}')

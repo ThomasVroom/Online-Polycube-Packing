@@ -16,7 +16,6 @@ if __name__ == '__main__':
     success = True
     while success and len(seq) > 0:
         success = agent.step(seq.pop())
-    print(f'Total fitted: {len(c.get_ids())}')
 
     # start the UI
     vis = Visualizer(c)
