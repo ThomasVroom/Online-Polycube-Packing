@@ -1,4 +1,5 @@
 from src.agents.agent import Agent
+from overrides import override
 import numpy as np
 
 class GreedyAgent(Agent):
@@ -21,6 +22,7 @@ class GreedyAgent(Agent):
         self.weights = weights
         super().__init__(container)
 
+    @override
     def step(self, shape):
         # get all the rotations of the shape
         rotations = shape.get_rotations()

@@ -22,7 +22,7 @@ class Agent(ABC):
         self.container.reset()
 
     @abstractmethod
-    def step(self, shape) -> bool:
+    def step(self, shape):
         '''
         Add a shape to the container.
 

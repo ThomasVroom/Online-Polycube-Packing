@@ -1,4 +1,5 @@
 from src.heuristics.heuristic import Heuristic
+from overrides import override
 import numpy as np
 
 class HeightMapMinimization(Heuristic):
@@ -14,6 +15,7 @@ class HeightMapMinimization(Heuristic):
         '''
         self.axis = axis
 
+    @override
     def get_score(self, matrix):
         # get the height map
         height_map = np.sum(matrix, axis=self.axis)

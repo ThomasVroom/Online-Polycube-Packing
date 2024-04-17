@@ -1,4 +1,5 @@
 from src.constraints.constraint import Constraint
+from overrides import override
 import numpy as np
 
 class Gravity(Constraint):
@@ -14,6 +15,7 @@ class Gravity(Constraint):
         '''
         self.connected = connected
 
+    @override
     def apply(self, matrix):
         # apply gravity to the matrix
         if self.connected:
@@ -81,6 +83,3 @@ class Gravity(Constraint):
                             matrix[x, h1 - 1, y] = matrix[x, h1, y]
                             matrix[x, h1, y] = 0
                             h1 -= 1
-
-    def is_satisfied(self, matrix):
-        return True # not relevant

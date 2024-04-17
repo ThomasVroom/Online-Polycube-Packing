@@ -1,4 +1,5 @@
 from src.agents.agent import Agent
+from overrides import override
 import numpy as np
 
 class RandomAgent(Agent):
@@ -18,6 +19,7 @@ class RandomAgent(Agent):
         self.max_tries = max_tries
         super().__init__(container)
 
+    @override
     def step(self, shape):
         # get all the rotations of the shape
         rotations = shape.get_rotations()

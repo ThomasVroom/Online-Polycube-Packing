@@ -1,4 +1,5 @@
 from src.heuristics.heuristic import Heuristic
+from overrides import override
 import numpy as np
 
 class BLBF(Heuristic):
@@ -6,6 +7,7 @@ class BLBF(Heuristic):
     Bottom-Left-Back-Fill (BLBF).
     '''
     
+    @override
     def get_score(self, matrix):
         # get the center of mass of the matrix
         center_of_mass = np.mean(np.argwhere(matrix), axis=0)

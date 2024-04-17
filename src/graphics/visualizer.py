@@ -135,7 +135,6 @@ class Visualizer:
     def update(self):
         '''
         Update the visualizer based on the current container.
-
         '''
 
         # assert gui is ready

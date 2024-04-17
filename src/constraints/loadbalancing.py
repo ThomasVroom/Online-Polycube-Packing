@@ -1,4 +1,5 @@
 from src.constraints.constraint import Constraint
+from overrides import override
 import numpy as np
 
 class LoadBalancing(Constraint):
@@ -14,9 +15,7 @@ class LoadBalancing(Constraint):
         '''
         self.margin = margin
 
-    def apply(self, matrix):
-        pass # not relevant
-
+    @override
     def is_satisfied(self, matrix):
         # get the dimensions of the matrix
         width, _, depth = matrix.shape

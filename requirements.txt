@@ -1,1 +1,4 @@
 open3d
+gymnasium
+overrides
+sb3-contrib
