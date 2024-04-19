@@ -1,39 +1,20 @@
 from abc import ABC, abstractmethod
+from src.environment import PackingEnv
 
 class Agent(ABC):
 
-    def __init__(self, container):
-        '''
-        Create an agent that can pack polycubes into a container.
-
-        Parameters
-        ----------
-            `container` : Container
-                the container object.
-        '''
-        
-        self.container = container
-        self.dimensions = container.get_dimensions()
-    
-    def reset(self):
-        '''
-        Reset the environment.
-        '''
-        self.container.reset()
-
     @abstractmethod
-    def step(self, shape):
+    def get_action(self, env: PackingEnv) -> int:
         '''
-        Add a shape to the container.
+        Get the next action to perform in the environment.
 
         Parameters
         ----------
-            `shape` : Polycube
-                the shape to be added.
+            `env` : `PackingEnv`
+                the environment to get the action for.
         
         Returns
         -------
-            `bool`
-                whether the shape was added successfully.
+            int : the action to perform.
         '''
         pass

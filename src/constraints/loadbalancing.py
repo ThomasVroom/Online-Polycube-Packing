@@ -4,7 +4,7 @@ import numpy as np
 
 class LoadBalancing(Constraint):
 
-    def __init__(self, margin=1.0):
+    def __init__(self, margin: float=1.0):
         '''
         Create a constraint that checks if the load of the matrix is balanced.
 
@@ -20,7 +20,7 @@ class LoadBalancing(Constraint):
         pass # not relevant
 
     @override
-    def is_satisfied(self, matrix):
+    def is_satisfied(self, matrix) -> bool:
         # get the dimensions of the matrix
         width, _, depth = matrix.shape
 

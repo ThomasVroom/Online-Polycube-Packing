@@ -4,7 +4,7 @@ import numpy as np
 
 class Gravity(Constraint):
 
-    def __init__(self, connected=True):
+    def __init__(self, connected: bool=True):
         '''
         Create a constraint that applies gravity to the matrix.
 
@@ -23,13 +23,13 @@ class Gravity(Constraint):
         else:
             self.apply_disconnected_gravity(matrix)
 
-    def apply_connected_gravity(self, matrix):
+    def apply_connected_gravity(self, matrix: np.ndarray):
         '''
         Apply gravity to connected components in the matrix.
 
         Parameters
         ----------
-            `matrix` : numpy array
+            `matrix` : `np.ndarray`
                 the matrix to apply gravity to.
         '''
         
@@ -60,13 +60,13 @@ class Gravity(Constraint):
                         # update moved ids
                         moved_ids.append(id)
     
-    def apply_disconnected_gravity(self, matrix):
+    def apply_disconnected_gravity(self, matrix: np.ndarray):
         '''
         Apply gravity to disconnected components in the matrix.
 
         Parameters
         ----------
-            `matrix` : numpy array
+            `matrix` : `np.ndarray`
                 the matrix to apply gravity to.
         '''
         
@@ -85,5 +85,5 @@ class Gravity(Constraint):
                             h1 -= 1
 
     @override
-    def is_satisfied(self, matrix):
+    def is_satisfied(self, matrix) -> bool:
         return True # not relevant

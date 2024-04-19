@@ -1,34 +1,33 @@
-from src.graphics.colormap import ColorMap
+from src.graphics import ColorMap
 import src.graphics.text_colors as tc
+from src.environment import PackingEnv
+from src.agents import Agent
 import open3d as o3d
 import numpy as np
 import time
 
 class Visualizer:
 
-    def __init__(self, container, voxel_size=0.05, agent_sequence_pair=(None, None)):
+    def __init__(self, environment: PackingEnv, voxel_size: float=0.05, agent: Agent=None):
         '''
-        Create a visualizer object that can visualize the packing space.
+        Create a visualizer object that can visualize the packing environment.
 
         Parameters
         ----------
-            `container` : `Container`
-                the container object that should be visualized.
+            `environment` : `PackingEnv`
+                the packing environment that should be visualized.
             `voxel_size` : float, optional
                 the mesh size of each voxel.
-            `agent_sequence_pair` : (`Agent`, List[`Polycube`]), optional
-                optional agent and sequence reference for controlling the packing through the UI.
+            `agent` : `Agent`, optional
+                optional agent reference for controlling the packing through the UI.
         '''
 
-        # set the container dimensions
-        self.width, self.height, self.depth = container.get_dimensions()
-        self.container = container
+        # set the environment variables
+        self.environment = environment
+        self.width, self.height, self.depth = environment.dimensions
         self.voxel_size = voxel_size
+        self.agent = agent
         self.started = False
-
-        # util for controlling the packing
-        self.agent, self.sequence = agent_sequence_pair
-        self.finished_packing = False
 
         # create a color map
         self.c = ColorMap()
@@ -53,7 +52,7 @@ class Visualizer:
         )
         self.line_set.colors = o3d.utility.Vector3dVector([[0, 0, 0] for _ in range(len(lines))])
 
-    def start(self, title='Online 3D Irregular Packing', width=1024, height=768):
+    def start(self, title: str='Online 3D Irregular Packing', width: int=1024, height: int=768, labels: bool=True):
         '''
         Start the visualizer.
 
@@ -65,6 +64,8 @@ class Visualizer:
                 the width of the window.
             `height` : int, optional
                 the height of the window.
+            `labels` : bool, optional
+                whether to show labels for the packed shapes (can be toggled).
         '''
 
         # initialize the visualizer
@@ -79,7 +80,7 @@ class Visualizer:
         self.w.show_settings = False
 
         # action for toggling labels
-        self.labels_visible = True
+        self.labels_visible = labels
         def toggle_labels(vis):
             if self.labels_visible: # labels are visible, hide them
                 vis.clear_3d_labels()
@@ -93,19 +94,15 @@ class Visualizer:
         # actions for controlling the packing
         if self.agent is not None:
             def next_shape(_):
-                if not self.finished_packing:
-                    if len(self.sequence) > 0:
-                        self.finished_packing = not self.agent.step(self.sequence.pop())
-                        self.update()
-                    else:
-                        print('No more shapes to pack.')
+                if not self.environment.is_terminal():
+                    self.environment.step(self.agent.get_action(self.environment))
+                    self.update()
                 else:
-                        print('No more shapes can be packed.')
-            def reset_container(_):
-                self.container.reset()
-                self.finished_packing = False
+                        print(f'{tc.CRED}error: environment is terminal{tc.CEND}')
+            def reset_environment(_):
+                self.environment.reset()
                 self.update()
-            self.w.add_action('reset container', reset_container)
+            self.w.add_action('reset environment', reset_environment)
             self.w.add_action('next shape', next_shape)
 
         # reset camera
@@ -116,7 +113,7 @@ class Visualizer:
         self.started = True # this might crash if await_start checks before the next line, but that margin is very small
         o3d.visualization.gui.Application.instance.run()
 
-    def await_start(self, timeout=10):
+    def await_start(self, timeout: float=10):
         '''
         Wait until the visualizer is started.
 
@@ -129,19 +126,19 @@ class Visualizer:
         start_time = time.time()
         while not self.started:
             if time.time() - start_time > timeout:
-                raise TimeoutError('visualizer did not start.')
+                raise TimeoutError(f'{tc.CRED}visualizer did not start{tc.CEND}')
         time.sleep(0.1) # give some time for the visualizer to finish starting
 
     def update(self):
         '''
-        Update the visualizer based on the current container.
+        Update the visualizer based on the current environment.
         '''
 
         # assert gui is ready
-        assert self.started, 'visualizer was not started.'
+        assert self.started, f'{tc.CRED}visualizer was not started{tc.CEND}'
 
         # reshape the array into (N, 3) form (only selects elements that are not 0)
-        points = np.argwhere(self.container.matrix)
+        points = np.argwhere(self.environment.container.matrix)
 
         # create a point cloud from the points
         pcd = o3d.geometry.PointCloud()
@@ -149,7 +146,7 @@ class Visualizer:
         pcd.translate([self.voxel_size/2, self.voxel_size/2, self.voxel_size/2]) # center w.r.t. line set
 
         # color all voxels
-        colors = [self.c.get_color(self.container.matrix[i, j, k]) for i, j, k in points]
+        colors = [self.c.get_color(self.environment.container.matrix[i, j, k], self.environment.np_random) for i, j, k in points]
         pcd.colors = o3d.utility.Vector3dVector(colors)
 
         # create a voxel grid from the point cloud
@@ -157,8 +154,8 @@ class Visualizer:
 
         # update labels
         self.labels = []
-        for id in self.container.get_ids():
-            points = np.argwhere(self.container.matrix == id)
+        for id in self.environment.container.get_ids():
+            points = np.argwhere(self.environment.container.matrix == id)
             mean = np.mean(np.asarray(points), axis=0) * self.voxel_size
             self.labels.append((mean + [0.5 * self.voxel_size, 0, 0.5 * self.voxel_size], id))
         if self.labels_visible:
@@ -170,4 +167,4 @@ class Visualizer:
         self.w.remove_geometry('voxel_grid')
         self.w.add_geometry('voxel_grid', voxel_grid)
         self.w.post_redraw()
-        print(f'{tc.CYELLOW2}total fitted: {len(self.container.get_ids())}{tc.CEND}')
+        print(f'{tc.CYELLOW2}total fitted: {len(self.environment.container.get_ids())}{tc.CEND}')

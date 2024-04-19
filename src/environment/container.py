@@ -1,8 +1,10 @@
 import numpy as np
+from src.constraints import Constraint
+from src.environment.shapes import Polycube
 
 class Container:
 
-    def __init__(self, width, height, depth, constraints=None):
+    def __init__(self, width: int, height: int, depth: int, constraints: list[Constraint]=None):
         '''
         Create a container object.
         
@@ -14,7 +16,7 @@ class Container:
                 the height of the container.
             `depth` : int
                 the depth of the container.
-            `constraints` : list of constraints, optional
+            `constraints` : `list[Constraint]`, optional
                 a list of constraints that the container must satisfy.
         '''
         
@@ -25,27 +27,25 @@ class Container:
         self.matrix = np.zeros((width, height, depth))
         self.constraints = [] if constraints is None else constraints
 
-    def get_dimensions(self):
+    def get_dimensions(self) -> tuple[int, int, int]:
         '''
         Get the dimensions of the container.
         Format: (width, height, depth).
         
         Returns
         -------
-            tuple : the dimensions of the container.
+            `tuple[int, int, int]` : the dimensions of the container.
         '''
-        
         return (self.width, self.height, self.depth)
     
-    def get_ids(self):
+    def get_ids(self) -> np.ndarray:
         '''
         Get the unique ids of the shapes in the container.
         
         Returns
         -------
-            list : the unique ids of the shapes in the container.
+            `np.ndarray` : the unique ids of the shapes in the container.
         '''
-        
         return np.unique(self.matrix)[1:]
 
     def reset(self):
@@ -54,26 +54,26 @@ class Container:
         '''
         self.matrix = np.zeros(self.get_dimensions())
     
-    def fits(self, shape, position):
+    def fits(self, polycube: Polycube, position: tuple[int, int, int]) -> bool:
         '''
-        Check if a shape fits in the container.
+        Check if a polycube fits in the container.
 
         Parameters
         ----------
-            `shape` : `Polycube`
-                the shape to be checked.
-            `position` : 3-dimensional integer vector
-                the position of the shape.
+            `polycube` : `Polycube`
+                the polycube to be checked.
+            `position` : `tuple[int, int, int]`
+                the position of the polycube.
         
         Returns
         -------
-            bool : True if the shape fits in the container, otherwise False.
+            bool : True if the polycube fits in the container, otherwise False.
         '''
 
-        # get the dimensions of the shape
-        shape_width, shape_height, shape_depth = shape.matrix.shape
+        # get the dimensions of the polycube
+        shape_width, shape_height, shape_depth = polycube.matrix.shape
 
-        # check if the shape fits in the container
+        # check if the polycube fits in the container
         if position[0] + shape_width > self.width:
             return False
         if position[1] + shape_height > self.height:
@@ -85,40 +85,40 @@ class Container:
         mx = np.ma.masked_array(self.matrix[position[0]:position[0] + shape_width,
                                             position[1]:position[1] + shape_height,
                                             position[2]:position[2] + shape_depth],
-                                            mask=(shape.matrix == 0))
+                                            mask=(polycube.matrix == 0))
         if np.any(mx):
             return False
         
-        # add the shape to the container
+        # add the polycube to the container
         self.matrix[position[0]:position[0] + shape_width,
                     position[1]:position[1] + shape_height,
-                    position[2]:position[2] + shape_depth] += shape.matrix
+                    position[2]:position[2] + shape_depth] += polycube.matrix
         
         # check if the constraints are satisfied
         for constraint in self.constraints:
             if not constraint.is_satisfied(self.matrix):
-                # remove the shape from the container
+                # remove the polycube from the container
                 self.matrix[position[0]:position[0] + shape_width,
                             position[1]:position[1] + shape_height,
-                            position[2]:position[2] + shape_depth] -= shape.matrix
+                            position[2]:position[2] + shape_depth] -= polycube.matrix
                 return False
         
-        # remove the shape from the container
+        # remove the polycube from the container
         self.matrix[position[0]:position[0] + shape_width,
                     position[1]:position[1] + shape_height,
-                    position[2]:position[2] + shape_depth] -= shape.matrix
+                    position[2]:position[2] + shape_depth] -= polycube.matrix
         return True
 
-    def add(self, shape, position):
+    def add(self, polycube: Polycube, position: tuple[int, int, int]) -> bool:
         '''
-        Add a shape to the container.
+        Add a polycube to the container.
         
         Parameters
         ----------
-            `shape` : `Polycube`
-                the shape to be added.
-            `position` : 3-dimensional integer vector
-                the position of the shape.
+            `polycube` : `Polycube`
+                the polycube to be added.
+            `position` : `tuple[int, int, int]`
+                the position of the polycube.
             
         Returns
         -------
@@ -126,19 +126,19 @@ class Container:
             (in this case the container will not be modified).
         '''
 
-        # check if the shape fits in the container
-        if not self.fits(shape, position):
+        # check if the polycube fits in the container
+        if not self.fits(polycube, position):
             return False
         
         # check if the id is already taken
-        while np.isin(shape.id, self.matrix):
-            shape.increment_id()
+        while np.isin(polycube.id, self.matrix):
+            polycube.increment_id()
 
-        # add the shape to the container
-        shape_width, shape_height, shape_depth = shape.matrix.shape
+        # add the polycube to the container
+        shape_width, shape_height, shape_depth = polycube.matrix.shape
         self.matrix[position[0]:position[0] + shape_width,
                     position[1]:position[1] + shape_height,
-                    position[2]:position[2] + shape_depth] += shape.matrix
+                    position[2]:position[2] + shape_depth] += polycube.matrix
         
         # apply constraints
         for constraint in self.constraints:
@@ -146,14 +146,14 @@ class Container:
         
         return True
 
-    def get_feasible_mask(self, shape):
+    def get_feasible_mask(self, polycube: Polycube) -> np.ndarray:
         '''
-        Get a mask of the container where the shape can fit.
+        Get a mask of the container where the polycube can fit.
 
         Parameters
         ----------
-            `shape` : `Polycube`
-                the shape to be checked (locked rotation).
+            `polycube` : `Polycube`
+                the polycube to be checked (locked rotation).
         
         Returns
         -------
@@ -165,35 +165,35 @@ class Container:
         for x in range(self.width):
             for y in range(self.height):
                 for z in range(self.depth):
-                    if self.fits(shape, (x, y, z)):
+                    if self.fits(polycube, (x, y, z)):
                         mask[x, y, z] = True
         return mask
 
-    def get_dummy_container(self, shape, position):
+    def get_dummy_container(self, polycube: Polycube, position: tuple[int, int, int]) -> np.ndarray:
         ''''
-        Get a copy of the container with the shape added.
+        Get a copy of the container with the polycube added.
         Note that this copy does not have unique ids for the shapes.
 
         Parameters
         ----------
-            `shape` : `Polycube`
-                the shape to be added.
-            `position` : 3-dimensional integer vector
-                the position of the shape.
+            `polycube` : `Polycube`
+                the polycube to be added.
+            `position` : `tuple[int, int, int]`
+                the position of the polycube.
         
         Returns
         -------
-            `np.ndarray` : a copy of the container with the shape added.
+            `np.ndarray` : a copy of the container with the polycube added.
         '''
 
         # create a copy of the container
         dummy_container = self.matrix.copy()
 
-        # add the shape to the container
-        shape_width, shape_height, shape_depth = shape.matrix.shape
+        # add the polycube to the container
+        shape_width, shape_height, shape_depth = polycube.matrix.shape
         dummy_container[position[0]:position[0] + shape_width,
                         position[1]:position[1] + shape_height,
-                        position[2]:position[2] + shape_depth] += shape.matrix
+                        position[2]:position[2] + shape_depth] += polycube.matrix
         
         # apply constraints
         for constraint in self.constraints:

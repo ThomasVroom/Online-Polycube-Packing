@@ -1,6 +1,6 @@
 from src.graphics import Visualizer
-from src.environment import ShapeGenerator
 from src.environment import Container
+from src.environment import PackingEnv
 from src.agents import GreedyAgent
 from src.heuristics import *
 
@@ -8,13 +8,13 @@ if __name__ == '__main__':
 
     # set up environment
     c = Container(5, 5, 5)
-    g = ShapeGenerator(upper_bound=5)
-    seq = g.create_sequence(50)
-    agent = GreedyAgent(c, heuristics=[HeightMapMinimization(axis=0),
-                                       HeightMapMinimization(axis=1),
-                                       HeightMapMinimization(axis=2),
-                                       HAPE()])
+    env = PackingEnv(c, upper_bound=5, seed=42)
+    agent = GreedyAgent(heuristics=[HAPE(),
+                                    HeightMapMinimization(axis=0),
+                                    HeightMapMinimization(axis=1),
+                                    HeightMapMinimization(axis=2)])
 
     # start the UI
-    vis = Visualizer(c, agent_sequence_pair=(agent, seq))
+    vis = Visualizer(env, agent=agent)
+    env.reset()
     vis.start()

@@ -4,9 +4,9 @@ import numpy as np
 
 class HeightMapMinimization(Heuristic):
 
-    def __init__(self, axis=1):
+    def __init__(self, axis: int=1):
         '''
-        Initialize the HeightMapMinimization heuristic.
+        Initialize the `HeightMapMinimization` heuristic.
 
         Parameters
         ----------
@@ -16,7 +16,7 @@ class HeightMapMinimization(Heuristic):
         self.axis = axis
 
     @override
-    def get_score(self, matrix):
+    def get_score(self, matrix) -> float:
         # get the height map
         height_map = np.sum(matrix, axis=self.axis)
 

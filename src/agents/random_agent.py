@@ -1,51 +1,20 @@
 from src.agents import Agent
 from overrides import override
-import numpy as np
 
 class RandomAgent(Agent):
 
-    def __init__(self, container, max_tries=100):
-        '''
-        Create a random agent that can pack polycubes into a container.
-
-        Parameters
-        ----------
-            `container` : Container
-                the container object.
-            `max_tries` : int, optional
-                the maximum number of tries to fit a polycube before giving up.
-        '''
-
-        self.max_tries = max_tries
-        super().__init__(container)
-
     @override
-    def step(self, shape):
-        # get all the rotations of the shape
-        rotations = shape.get_rotations()
+    def get_action(self, env) -> int:
+        # get current polycube id
+        id = env.get_current_polycube().id
 
-        # state variables
-        options_tried = 0
-        successful_fit = False
+        # get the feasible positions for the current polycube
+        feasible_positions = env.get_feasible_positions()
+        print(f'found {len(feasible_positions)} feasible positions for polycube {id}')
 
-        # try to add the polycube to the container
-        while not (successful_fit or options_tried >= self.max_tries):
-            # select a random rotation
-            p = np.random.choice(rotations)
+        # select a random feasible position
+        pos = env.np_random.choice(feasible_positions)
+        print(f'adding polycube {id} at position {pos[1], pos[2], pos[3]}')
 
-            # get random position
-            x = np.random.randint(0, self.dimensions[0] - 1)
-            y = np.random.randint(0, self.dimensions[1] - 1)
-            z = np.random.randint(0, self.dimensions[2] - 1)
-            print(f'polycube {p.id} : attempt {options_tried + 1} at ({x}, {y}, {z})...', end='\r')
-
-            # try to fit the polycube
-            if self.container.add(p, (x, y, z)):
-                successful_fit = True
-            
-            # increment options tried
-            options_tried += 1
-
-        # print the result
-        print('', end='\n', flush=True)
-        return successful_fit
+        # return the action
+        return env.encode_action(pos[0], (pos[1], pos[2], pos[3]))

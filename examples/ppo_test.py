@@ -1,6 +1,5 @@
 from src.environment import PackingEnv
 from src.environment import Container
-from src.environment import ShapeGenerator
 from sb3_contrib import MaskablePPO
 from src.graphics import Visualizer
 from threading import Thread
@@ -8,7 +7,7 @@ from threading import Thread
 if __name__ == '__main__':
 
     c = Container(5, 5, 5)
-    env = PackingEnv(c, ShapeGenerator(upper_bound=5))
+    env = PackingEnv(c, upper_bound=5, seed=42)
     model = MaskablePPO('MultiInputPolicy', env, seed=42, verbose=1)
 
     obs, _ = env.reset()
@@ -19,7 +18,7 @@ if __name__ == '__main__':
     print('reward:', reward)
     print('terminated:', terminated)
 
-    vis = Visualizer(c)
+    vis = Visualizer(env)
     def update_ui():
         vis.await_start()
         vis.update()

@@ -8,7 +8,7 @@ class BLBF(Heuristic):
     '''
     
     @override
-    def get_score(self, matrix):
+    def get_score(self, matrix) -> float:
         # get the center of mass of the matrix
         center_of_mass = np.mean(np.argwhere(matrix), axis=0)
 
