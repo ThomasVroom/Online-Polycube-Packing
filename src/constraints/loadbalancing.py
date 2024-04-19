@@ -16,6 +16,10 @@ class LoadBalancing(Constraint):
         self.margin = margin
 
     @override
+    def apply(self, matrix):
+        pass # not relevant
+
+    @override
     def is_satisfied(self, matrix):
         # get the dimensions of the matrix
         width, _, depth = matrix.shape

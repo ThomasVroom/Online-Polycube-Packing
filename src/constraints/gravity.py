@@ -83,3 +83,7 @@ class Gravity(Constraint):
                             matrix[x, h1 - 1, y] = matrix[x, h1, y]
                             matrix[x, h1, y] = 0
                             h1 -= 1
+
+    @override
+    def is_satisfied(self, matrix):
+        return True # not relevant
