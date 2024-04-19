@@ -1,17 +1,13 @@
-from src.graphics.visualizer import Visualizer
-from src.environment.shapes import ShapeGenerator
-from src.environment.container import Container
-from src.agents.greedy_agent import GreedyAgent
-from src.heuristics.HAPE import HAPE
-from src.heuristics.BLBF import BLBF
-from src.heuristics.HM import HeightMapMinimization
-from src.constraints.gravity import Gravity
-from threading import Thread
+from src.graphics import Visualizer
+from src.environment import ShapeGenerator
+from src.environment import Container
+from src.agents import GreedyAgent
+from src.heuristics import *
 
 if __name__ == '__main__':
 
     # set up environment
-    c = Container(5, 5, 5, constraints=[])
+    c = Container(5, 5, 5)
     g = ShapeGenerator(upper_bound=5)
     seq = g.create_sequence(50)
     agent = GreedyAgent(c, heuristics=[HeightMapMinimization(axis=0),

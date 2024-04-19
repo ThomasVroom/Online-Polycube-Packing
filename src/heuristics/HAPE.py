@@ -1,4 +1,4 @@
-from src.heuristics.heuristic import Heuristic
+from src.heuristics import Heuristic
 from overrides import override
 import numpy as np
 

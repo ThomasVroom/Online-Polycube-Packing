@@ -1,4 +1,4 @@
-from src.agents.agent import Agent
+from src.agents import Agent
 from overrides import override
 import numpy as np
 

@@ -1,8 +1,8 @@
-from src.environment.packing_environment import PackingEnv
-from src.environment.container import Container
-from src.environment.shapes import ShapeGenerator
+from src.environment import PackingEnv
+from src.environment import Container
+from src.environment import ShapeGenerator
 from sb3_contrib import MaskablePPO
-from src.graphics.visualizer import Visualizer
+from src.graphics import Visualizer
 from threading import Thread
 
 if __name__ == '__main__':

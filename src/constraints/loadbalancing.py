@@ -1,4 +1,4 @@
-from src.constraints.constraint import Constraint
+from src.constraints import Constraint
 from overrides import override
 import numpy as np
 
