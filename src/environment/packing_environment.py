@@ -76,8 +76,15 @@ class PackingEnv(gym.Env):
         # return the observation
         return {'container': binary_container, 'polycube': binary_polycube}
     
-    def _get_info(self):
-        pass
+    def _get_info(self) -> dict:
+        '''
+        Get additional information about the environment.
+
+        Returns
+        -------
+            `dict` : additional information about the environment.
+        '''
+        return {}
 
     @override
     def reset(self, seed: int=None, options=None):
@@ -110,8 +117,8 @@ class PackingEnv(gym.Env):
         # check if the episode is done
         terminated = self.is_terminal()
 
-        # give binary sparse rewards
-        reward = 1 if terminated else 0 # TODO: or the heuristic scores?
+        # the reward is the number of polycubes placed in the container
+        reward = len(self.container.get_ids()) if terminated else 0
 
         # return the next observation, reward, terminated, truncated and info
         return self._get_obs(), reward, terminated, False, self._get_info()
