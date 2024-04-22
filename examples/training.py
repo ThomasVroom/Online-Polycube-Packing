@@ -9,11 +9,12 @@ if __name__ == '__main__':
     # variables
     container_dim = (5, 5, 5) # dimensions of the container (width, height, depth)
     upper_bound = 5 # upper bound of the polycube size
-    callback_freq = 50 # how often the model should be evaluated (in steps)
+    callback_freq = 1000 # how often the model should be evaluated (in steps)
     n_eval_episodes = 10 # number of episodes to evaluate the model
-    name = 'model-test-1' # name of the model
-    update_freq = 10 # how often the policy should be updated (in steps)
-    total_timesteps = 100 # total number of steps to train the model
+    name = '5x5x5-5' # name of the model
+    run = 1 # run number
+    update_freq = 100 # how often the policy should be updated (in steps)
+    total_timesteps = 100000 # total number of steps to train the model
     checkpoint = '' # path to the model to continue training
 
     # create callbacks
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     checkpoint_callback = CheckpointCallback(
         save_freq=callback_freq,
         save_path='resources/models/',
-        name_prefix=name,
+        name_prefix=name + '-' + str(run),
         save_replay_buffer=True,
         verbose=2
     )
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     model.learn(
         total_timesteps=total_timesteps,
         callback=callback,
-        tb_log_name='PPO',
+        tb_log_name=name,
         reset_num_timesteps=True,
         progress_bar=True
     )
