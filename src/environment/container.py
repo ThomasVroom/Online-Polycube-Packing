@@ -46,7 +46,9 @@ class Container:
         -------
             `np.ndarray` : the unique ids of the shapes in the container.
         '''
-        return np.unique(self.matrix)[1:]
+
+        unique = np.unique(self.matrix)
+        return unique[np.where(unique != 0)]
 
     def reset(self):
         '''

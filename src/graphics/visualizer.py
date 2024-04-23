@@ -167,4 +167,4 @@ class Visualizer:
         self.w.remove_geometry('voxel_grid')
         self.w.add_geometry('voxel_grid', voxel_grid)
         self.w.post_redraw()
-        print(f'{tc.CYELLOW2}total fitted: {len(self.environment.container.get_ids())}{tc.CEND}')
+        print(f'{tc.CYELLOW2}total fitted: {len(self.labels)}{tc.CEND}')

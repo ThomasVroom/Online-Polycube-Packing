@@ -7,12 +7,12 @@ from src.agents import PPOAgent
 if __name__ == '__main__':
 
     # set up environment
-    c = Container(5, 5, 5)
-    env = PackingEnv(c, upper_bound=5, seed=42)
+    c = Container(3, 3, 3)
+    env = PackingEnv(c, upper_bound=3, seed=None)
 
     # load model
-    model = MaskablePPO('MultiInputPolicy', env, seed=42, device='cuda')
-    model.set_parameters('resources/models/5x5x5-5-1_100000_steps.zip')
+    model = MaskablePPO('MultiInputPolicy', env, seed=None, device='cuda')
+    model.set_parameters('resources/models/3x3x3.zip')
     agent = PPOAgent(model)
 
     # start the UI

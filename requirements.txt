@@ -3,3 +3,4 @@ gymnasium
 overrides
 sb3-contrib
 stable-baselines3[extra]
+tensorflow
