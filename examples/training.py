@@ -7,29 +7,23 @@ from stable_baselines3.common.callbacks import CheckpointCallback, CallbackList
 if __name__ == '__main__':
 
     # variables
-    container_dim = (5, 5, 5) # dimensions of the container (width, height, depth)
-    upper_bound = 5 # upper bound of the polycube size
-    callback_freq = 1000 # how often the model should be evaluated (in steps)
-    n_eval_episodes = 10 # number of episodes to evaluate the model
-    name = '5x5x5-5' # name of the model
+    container_dim = (3, 3, 3) # dimensions of the container (width, height, depth)
+    upper_bound = 3 # upper bound of the polycube size
     run = 1 # run number
-    update_freq = 100 # how often the policy should be updated (in steps)
-    total_timesteps = 100000 # total number of steps to train the model
-    checkpoint = '' # path to the model to continue training
+    checkpoint = '' # path to a model to continue training
 
     # create callbacks
     eval_callback = MaskableEvalCallback(
         eval_env=PackingEnv(Container(container_dim[0], container_dim[1], container_dim[2]), upper_bound=upper_bound),
-        eval_freq=callback_freq,
-        n_eval_episodes=n_eval_episodes,
+        eval_freq=10000, # how often the model should be evaluated (in steps)
+        n_eval_episodes=10, # how many episodes to evaluate the model
         verbose=1,
         warn=False
     )
     checkpoint_callback = CheckpointCallback(
-        save_freq=callback_freq,
+        save_freq=10000, # how often the model should be saved (in steps)
         save_path='resources/models/',
-        name_prefix=name + '-' + str(run),
-        save_replay_buffer=True,
+        name_prefix=f'{container_dim[0]}x{container_dim[1]}x{container_dim[2]}-{upper_bound}-{run}',
         verbose=2
     )
     callback = CallbackList([eval_callback, checkpoint_callback])
@@ -38,7 +32,21 @@ if __name__ == '__main__':
     model = MaskablePPO(
         policy='MultiInputPolicy',
         env=PackingEnv(Container(container_dim[0], container_dim[1], container_dim[2]), upper_bound=upper_bound),
-        n_steps=update_freq,
+        learning_rate=0.0003,
+        n_steps=2048, # number of steps to collect samples for each policy update
+        batch_size=64, # number of samples per training batch (policy update)
+        n_epochs=10, # number of epochs when updating the policy
+        gamma=0.99,
+        gae_lambda=0.95, # factor for trade-off of bias vs variance for Generalized Advantage Estimator
+        clip_range=0.2, # clip range for the policy loss
+        clip_range_vf=None, # clip range for the value function
+        normalize_advantage=True,
+        ent_coef=0, # entropy coefficient for the loss calculation
+        vf_coef=0.5, # value function coefficient for the loss calculation
+        max_grad_norm=0.5, # max gradient norm
+        rollout_buffer_class=None,
+        rollout_buffer_kwargs=None,
+        target_kl=None,
         tensorboard_log='resources/logs/', # to see logs, run `tensorboard --logdir resources/logs/`
         device='cuda'
     )
@@ -47,9 +55,9 @@ if __name__ == '__main__':
 
     # train model
     model.learn(
-        total_timesteps=total_timesteps,
+        total_timesteps=100000, # total number of steps to train the model
         callback=callback,
-        tb_log_name=name,
+        tb_log_name=f'{container_dim[0]}x{container_dim[1]}x{container_dim[2]}-{upper_bound}',
         reset_num_timesteps=True,
         progress_bar=True
     )
