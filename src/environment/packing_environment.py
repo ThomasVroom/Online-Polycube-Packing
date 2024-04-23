@@ -37,6 +37,7 @@ class PackingEnv(gym.Env):
         self.sequence = None
         self.dimensions = container.get_dimensions()
         self.action_space_nvec = np.append([24], self.dimensions)
+        self.feasible_positions = None
 
         # the observation space is defined as the combination of the (current) container and the (next) polycube.
         # the container is represented as a binary tensor, where 1 indicates an occupied cell.
@@ -99,6 +100,9 @@ class PackingEnv(gym.Env):
             self.sequence = self.generator.create_sequence(self.sequence_length, rng=self.np_random)
         else:
             self.sequence = self.generator.load_sequence(self.sequence_path)
+
+        # set the feasible positions
+        self.feasible_positions = self.find_feasible_positions()
         
         # return the current observation
         return self._get_obs(), self._get_info()
@@ -113,6 +117,9 @@ class PackingEnv(gym.Env):
 
         # add the polycube to the container
         self.container.add(polycube, (pos[0], pos[1], pos[2]))
+
+        # set the feasible positions
+        self.feasible_positions = self.find_feasible_positions()
 
         # check if the episode is done
         terminated = self.is_terminal()
@@ -133,7 +140,7 @@ class PackingEnv(gym.Env):
         '''
 
         # the state is terminal if the sequence is empty or no feasible positions are available
-        return len(self.sequence) == 0 or len(self.get_feasible_positions()) == 0
+        return len(self.sequence) == 0 or len(self.feasible_positions) == 0
     
     def get_current_polycube(self) -> Polycube:
         '''
@@ -184,9 +191,9 @@ class PackingEnv(gym.Env):
         # encode the rotation and position of the polycube
         return np.ravel_multi_index([rot, pos[0], pos[1], pos[2]], self.action_space_nvec)
     
-    def get_feasible_positions(self) -> list[tuple[int, int, int, int]]:
+    def find_feasible_positions(self) -> list[tuple[int, int, int, int]]:
         '''
-        Get the feasible positions for the current polycube.
+        Find the feasible positions for the current polycube.
 
         Returns
         -------
@@ -208,12 +215,9 @@ class PackingEnv(gym.Env):
             `list[bool]` : the action masks for the current state of the environment (True if the action is valid).
         '''
 
-        # get all feasible positions for the current polycube (format: r, x, y, z)
-        feasible_positions = self.get_feasible_positions()
-
         # set the action mask
         action_mask = np.full(np.prod(self.action_space_nvec), False, dtype=bool)
-        for pos in feasible_positions: # encode the positions as a single number
+        for pos in self.feasible_positions: # encode the positions as a single number
             action_mask[self.encode_action(pos[0], (pos[1], pos[2], pos[3]))] = True
         
         # return the action mask

@@ -9,7 +9,7 @@ class RandomAgent(Agent):
         id = env.get_current_polycube().id
 
         # get the feasible positions for the current polycube
-        feasible_positions = env.get_feasible_positions()
+        feasible_positions = env.feasible_positions
         print(f'found {len(feasible_positions)} feasible positions for polycube {id}')
 
         # select a random feasible position

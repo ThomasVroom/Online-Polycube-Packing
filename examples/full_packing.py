@@ -26,4 +26,4 @@ if __name__ == '__main__':
         vis.await_start()
         vis.update()
     Thread(target=update_ui).start()
-    vis.start()
+    vis.start(labels=False)

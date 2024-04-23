@@ -29,7 +29,7 @@ class GreedyAgent(Agent):
         rotations = env.get_current_polycube().get_rotations()
 
         # get the feasible positions for the current polycube
-        feasible_positions = env.get_feasible_positions()
+        feasible_positions = env.feasible_positions
         print(f'found {len(feasible_positions)} feasible positions for polycube {id}')
 
         # create score table for heuristics
