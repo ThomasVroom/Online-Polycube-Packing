@@ -62,7 +62,7 @@ if __name__ == '__main__':
         model.set_parameters(checkpoint)
 
     # train model
-    model.learn(
+    model.learn( # torch bug: https://github.com/DLR-RM/stable-baselines3/issues/1596
         total_timesteps=250000, # total number of steps to train the model
         callback=callback,
         tb_log_name=f'{container_dim[0]}x{container_dim[1]}x{container_dim[2]}',
