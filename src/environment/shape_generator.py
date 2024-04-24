@@ -5,14 +5,16 @@ from src.environment.shapes import Polycube
 
 class ShapeGenerator:
 
-    def __init__(self, upper_bound: int):
+    def __init__(self, upper_bound: int, cache_path: str='resources/polycubes'):
         '''
         Create a shape generator that can generate random polycubes.
 
         Parameters
         ----------
             `upper_bound` : int
-                the maximum size of the polycube (3 <= upper_bound <= 10).  
+                the maximum size of the polycube (3 <= upper_bound <= 10).
+            `cache_path` : str, optional
+                the path to the cache of polycubes.
         '''
 
         # check if the upper bound is valid
@@ -25,12 +27,12 @@ class ShapeGenerator:
 
         while upper_bound >= 3:
             # check if the cache exist
-            cache_path = os.path.join('resources', 'polycubes', f'cubes_{upper_bound}.npy')
-            assert os.path.exists(cache_path), "cache was not found."
+            path = os.path.join(cache_path, f'cubes_{upper_bound}.npy')
+            assert os.path.exists(path), "cache was not found."
 
             # load the cache (source: https://github.com/mikepound/cubes)
             print(f"\rLoading polycubes n={upper_bound} from cache: ", end = "")
-            self.polycubes = np.concatenate((self.polycubes, np.load(cache_path, allow_pickle=True)))
+            self.polycubes = np.concatenate((self.polycubes, np.load(path, allow_pickle=True)))
             print(f"{len(self.polycubes)} shapes")
 
             # decrement the upper bound
@@ -63,7 +65,7 @@ class ShapeGenerator:
         # get the corresponding polycube
         return Polycube(self.polycubes[idx] * (idx + 1))
     
-    def create_sequence(self, length: int, file_path: str=None, rng: np.random.Generator=None) -> list[Polycube]:
+    def create_sequence(self, length: int, rng: np.random.Generator=None) -> list[Polycube]:
         '''
         Create a sequence of polycubes.
 
@@ -71,8 +73,6 @@ class ShapeGenerator:
         ----------
             `length` : int
                 the length of the sequence.
-            `file_path` : str, optional
-                the path to save the sequence to.
             `rng` : `np.random.Generator`, optional
                 a random number generator.
         
@@ -81,40 +81,4 @@ class ShapeGenerator:
             `list[Polycube]` : a list of random Polycube objects
                 a sequence of polycubes.
         '''
-
-        # create a random sequence
-        if file_path is None:
-            return [self.get_random_polycube(rng=rng) for _ in range(length)]
-
-        # create a random sequence and save it to a file
-        if rng is None:
-            seq = np.random.choice(range(len(self.polycubes)), length).tolist()
-        else:
-            seq = rng.choice(range(len(self.polycubes)), length).tolist()
-        with open(file_path, 'w') as f:
-            json.dump({'upper_bound':self.upper_bound, 'length':length, 'sequence':seq}, f)
-
-        # return the sequence from the file
-        return self.load_sequence(file_path)
-    
-    def load_sequence(self, file_path: str) -> list[Polycube]:
-        '''
-        Load a sequence of polycubes from a file.
-
-        Parameters
-        ----------
-            `file_path` : str
-                the path to the file.
-        
-        Returns
-        -------
-            `list[Polycube]` : a list of Polycube objects
-                a sequence of polycubes.
-        '''
-
-        # load the sequence
-        with open(file_path, 'r') as f:
-            seq = json.load(f)['sequence']
-
-        # convert the sequence to polycubes
-        return [self.get_random_polycube(idx) for idx in seq]
+        return [self.get_random_polycube(rng=rng) for _ in range(length)]

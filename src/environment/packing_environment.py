@@ -9,11 +9,10 @@ from src.environment.shapes import Polycube
 class PackingEnv(gym.Env):
     
     def __init__(
-            self,
-            container: Container,
+            self,container: Container,
             upper_bound: int=None,
             seq_length: int=100,
-            seq_path: str=None,
+            cache_path: str='resources/polycubes',
             seed: int=None,
             exp_packed: int=0
         ):
@@ -27,9 +26,9 @@ class PackingEnv(gym.Env):
             `upper_bound` : int, optional
                 an upper bound for the size of the polycubes to pack.
             `seq_length` : int, optional
-                the length of the sequence of polycubes to pack (only relevant if `seq_path` is not used).
-            `seq_path` : str, optional
-                the path to a sequence of polycubes to pack (overwrites `upper_bound` and `seq_length`).
+                the length of the sequence of polycubes to pack.
+            `cache_path` : str, optional
+                the path to the cache of polycubes.
             `seed` : int, optional
                 the seed for the random number generator (used when packing through UI).
             `exp_packed` : int, optional
@@ -38,11 +37,9 @@ class PackingEnv(gym.Env):
 
         # set the environment variables
         self.container = container
-        self.sequence_path = seq_path
-        if seq_path is None:
-            assert upper_bound <= max(container.get_dimensions()), 'polycubes cannot be larger than the container'
-            self.generator = ShapeGenerator(upper_bound)
-            self.sequence_length = seq_length
+        assert upper_bound <= max(container.get_dimensions()), 'polycubes cannot be larger than the container'
+        self.generator = ShapeGenerator(upper_bound, cache_path)
+        self.sequence_length = seq_length
         self.seed = seed
         self.exp_packed = exp_packed
         self.sequence = None
@@ -107,10 +104,7 @@ class PackingEnv(gym.Env):
         self.container.reset()
 
         # generate a new sequence
-        if self.sequence_path is None:
-            self.sequence = self.generator.create_sequence(self.sequence_length, rng=self.np_random)
-        else:
-            self.sequence = self.generator.load_sequence(self.sequence_path)
+        self.sequence = self.generator.create_sequence(self.sequence_length, rng=self.np_random)
 
         # set the feasible positions
         self.feasible_positions = self.find_feasible_positions()
