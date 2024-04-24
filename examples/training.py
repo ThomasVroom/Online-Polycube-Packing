@@ -16,7 +16,7 @@ if __name__ == '__main__':
     eval_callback = MaskableEvalCallback(
         eval_env=PackingEnv(
             Container(container_dim[0], container_dim[1], container_dim[2]),
-            upper_bound=min(container_dim),
+            upper_bound=max(container_dim),
             exp_packed=expected_packed
         ),
         eval_freq=10000, # how often the model should be evaluated (in steps)
@@ -37,7 +37,7 @@ if __name__ == '__main__':
         policy='MultiInputPolicy',
         env=PackingEnv(
             Container(container_dim[0], container_dim[1], container_dim[2]),
-            upper_bound=min(container_dim),
+            upper_bound=max(container_dim),
             exp_packed=expected_packed
         ),
         learning_rate=0.0003,
