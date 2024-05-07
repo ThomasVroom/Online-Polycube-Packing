@@ -5,12 +5,13 @@ from overrides import override
 from src.environment import Container
 from src.environment import ShapeGenerator
 from src.environment.shapes import Polycube
+from src.heuristics import Heuristic
 
 class PackingEnv(gym.Env):
     
     def __init__(
             self,container: Container,
-            upper_bound: int=None,
+            upper_bound: int,
             seq_length: int=100,
             cache_path: str='resources/polycubes',
             seed: int=None,
@@ -23,7 +24,7 @@ class PackingEnv(gym.Env):
         ----------
             `container` : `Container`
                 the container that needs to be packed.
-            `upper_bound` : int, optional
+            `upper_bound` : int
                 an upper bound for the size of the polycubes to pack.
             `seq_length` : int, optional
                 the length of the sequence of polycubes to pack.
@@ -46,6 +47,8 @@ class PackingEnv(gym.Env):
         self.dimensions = container.get_dimensions()
         self.action_space_nvec = np.append([24], self.dimensions)
         self.feasible_positions = None
+        self.heuristics = None
+        self.heuristics_n = None
 
         # the observation space is defined as the combination of the (current) container and the (next) polycube.
         # the container is represented as a binary tensor, where 1 indicates an occupied cell.
@@ -220,10 +223,64 @@ class PackingEnv(gym.Env):
             `list[bool]` : the action masks for the current state of the environment (True if the action is valid).
         '''
 
-        # set the action mask
+        # check if heuristics are set
+        if self.heuristics is not None:
+            return self.get_heuristic_mask()
+
+        # create the action mask
         action_mask = np.full(np.prod(self.action_space_nvec), False, dtype=bool)
         for pos in self.feasible_positions: # encode the positions as a single number
             action_mask[self.encode_action(pos[0], (pos[1], pos[2], pos[3]))] = True
         
         # return the action mask
         return action_mask
+    
+    def set_heuristics(self, heuristics: list[Heuristic], n: int):
+        '''
+        Set the heuristics for the environment.
+        If set, this will alter the `action_masks` method to consider the `n` best positions according to the heuristics.
+
+        Parameters
+        ----------
+            `heuristics` : `list[Heuristic]`
+                the heuristics to use.
+            `n` : int
+                the number of best positions to consider.
+        '''
+        self.heuristics = heuristics
+        self.heuristics_n = n
+    
+    def get_heuristic_mask(self) -> list[bool]:
+        '''
+        Get the heuristic mask for the current state of the environment.
+
+        Returns
+        -------
+            `list[bool]` : the heuristic mask for the current state of the environment (True if the action is valid).
+        '''
+
+        # create the heuristic mask
+        heuristic_mask = np.full(np.prod(self.action_space_nvec), False, dtype=bool)
+
+        # get all rotations of the current polycube
+        rotations = self.get_current_polycube().get_rotations()
+
+        # create score table for heuristics
+        scores = np.zeros((len(self.heuristics), len(self.feasible_positions)))
+
+        # get the scores for every feasible position
+        for j, (r, x, y, z) in enumerate(self.feasible_positions):
+            for i, h in enumerate(self.heuristics):
+                scores[i, j] = h.get_score(self.container.get_dummy_container(rotations[r], (x, y, z)))
+
+        # average the scores
+        avg_scores = np.average(scores, axis=0)
+
+        # get the best positions
+        sorted_feasible_positions = np.argsort(avg_scores)[-self.heuristics_n:]
+        for p in sorted_feasible_positions:
+            pos = self.feasible_positions[p]
+            heuristic_mask[self.encode_action(pos[0], (pos[1], pos[2], pos[3]))] = True
+
+        # return the heuristic mask
+        return heuristic_mask

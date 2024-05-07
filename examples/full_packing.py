@@ -10,10 +10,8 @@ if __name__ == '__main__':
     # set up environment
     c = Container(5, 5, 5)
     env = PackingEnv(c, upper_bound=5, seed=42)
-    agent = GreedyAgent(heuristics=[HAPE(),
-                                    HeightMapMinimization(axis=0),
-                                    HeightMapMinimization(axis=1),
-                                    HeightMapMinimization(axis=2)])
+    agent = GreedyAgent(heuristics=[BLBF(),
+                                    HAPE()])
 
     # pack the shapes
     env.reset()

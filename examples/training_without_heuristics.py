@@ -3,6 +3,7 @@ from src.environment import Container
 from sb3_contrib import MaskablePPO
 from sb3_contrib.common.maskable.callbacks import MaskableEvalCallback
 from stable_baselines3.common.callbacks import CheckpointCallback, CallbackList
+from src.heuristics import *
 
 if __name__ == '__main__':
 
@@ -12,21 +13,24 @@ if __name__ == '__main__':
     checkpoint = '' # path to a model to continue training
     expected_packed = 8 # expected number of polycubes that will be packed (used to normalize rewards)
 
+    # create environment
+    env = PackingEnv(
+        Container(container_dim[0], container_dim[1], container_dim[2]),
+        upper_bound=max(container_dim),
+        exp_packed=expected_packed
+    )
+
     # create callbacks
     eval_callback = MaskableEvalCallback(
-        eval_env=PackingEnv(
-            Container(container_dim[0], container_dim[1], container_dim[2]),
-            upper_bound=max(container_dim),
-            exp_packed=expected_packed
-        ),
+        eval_env=env,
         eval_freq=50000, # how often the model should be evaluated (in steps)
-        n_eval_episodes=10, # how many episodes to evaluate the model
+        n_eval_episodes=25, # how many episodes to evaluate the model
         verbose=1,
         warn=False
     )
     checkpoint_callback = CheckpointCallback(
         save_freq=50000, # how often the model should be saved (in steps)
-        save_path='resources/models/',
+        save_path='resources/models/without_heuristics/',
         name_prefix=f'{container_dim[0]}x{container_dim[1]}x{container_dim[2]}-{run}',
         verbose=2
     )
@@ -35,11 +39,7 @@ if __name__ == '__main__':
     # create model
     model = MaskablePPO(
         policy='MultiInputPolicy',
-        env=PackingEnv(
-            Container(container_dim[0], container_dim[1], container_dim[2]),
-            upper_bound=max(container_dim),
-            exp_packed=expected_packed
-        ),
+        env=env,
         learning_rate=0.0003,
         n_steps=2500, # number of steps to collect samples for each policy update
         batch_size=64, # number of samples per training batch (policy update)
@@ -55,7 +55,8 @@ if __name__ == '__main__':
         rollout_buffer_class=None,
         rollout_buffer_kwargs=None,
         target_kl=None,
-        tensorboard_log='resources/logs/', # to see logs, run `tensorboard --logdir resources/logs/`
+        tensorboard_log='resources/logs/without_heuristics/', 
+        # to see logs, run `tensorboard --logdir resources/logs/without_heuristics/`
         device='cuda'
     )
     if checkpoint: # load model from checkpoint

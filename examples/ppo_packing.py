@@ -8,11 +8,11 @@ if __name__ == '__main__':
 
     # set up environment
     c = Container(3, 3, 3)
-    env = PackingEnv(c, upper_bound=3, seed=None)
+    env = PackingEnv(c, upper_bound=3, seed=42)
 
     # load model
-    model = MaskablePPO('MultiInputPolicy', env, seed=None, device='cuda')
-    model.set_parameters('resources/models/3x3x3.zip')
+    model = MaskablePPO('MultiInputPolicy', env, device='cuda')
+    model.set_parameters('resources/models/without_heuristics/3x3x3.zip')
     agent = PPOAgent(model)
 
     # start the UI
