@@ -8,19 +8,19 @@ from src.heuristics import *
 if __name__ == '__main__':
 
     # variables
-    container_dim = (3, 3, 3) # dimensions of the container (width, height, depth)
-    run = 0 # run number
+    container_dim = (4, 4, 4) # dimensions of the container (width, height, depth)
+    run = '' # run number
     checkpoint = '' # path to a model to continue training
-    expected_packed = 8 # expected number of polycubes that will be packed (used to normalize rewards)
-    heuristics = [BLBF()]
-    n = 15 # max size of action space
-    epochs = 300000 # number of steps to train the model
+    expected_packed = 0 # expected number of polycubes that will be packed (used to normalize rewards)
+    heuristics = [BLBF(), HAPE()]
+    n = 50 # max size of action space
+    epochs = 1000000 # number of steps to train the model
 
     # create environment
     env = PackingEnv(
         Container(container_dim[0], container_dim[1], container_dim[2]),
         upper_bound=max(container_dim),
-        seq_length=15,
+        seq_length=25,
         exp_packed=expected_packed
     )
     env.set_heuristics(heuristics, n)
