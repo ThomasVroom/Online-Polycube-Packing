@@ -9,15 +9,15 @@ if __name__ == '__main__':
 
     # variables
     container_dim = (3, 3, 3) # dimensions of the container (width, height, depth)
-    run = 0 # run number
+    run = '' # run number
     checkpoint = '' # path to a model to continue training
-    expected_packed = 8 # expected number of polycubes that will be packed (used to normalize rewards)
+    epochs = 500000 # number of steps to train the model
 
     # create environment
     env = PackingEnv(
         Container(container_dim[0], container_dim[1], container_dim[2]),
         upper_bound=max(container_dim),
-        exp_packed=expected_packed
+        seq_length=15
     )
 
     # create callbacks
@@ -26,10 +26,11 @@ if __name__ == '__main__':
         eval_freq=50000, # how often the model should be evaluated (in steps)
         n_eval_episodes=25, # how many episodes to evaluate the model
         verbose=1,
+        deterministic=True,
         warn=False
     )
     checkpoint_callback = CheckpointCallback(
-        save_freq=50000, # how often the model should be saved (in steps)
+        save_freq=epochs, # how often the model should be saved (in steps)
         save_path='resources/models/without_heuristics/',
         name_prefix=f'{container_dim[0]}x{container_dim[1]}x{container_dim[2]}-{run}',
         verbose=2
@@ -64,7 +65,7 @@ if __name__ == '__main__':
 
     # train model
     model.learn( # torch bug: https://github.com/DLR-RM/stable-baselines3/issues/1596
-        total_timesteps=500000, # total number of steps to train the model
+        total_timesteps=epochs,
         callback=callback,
         tb_log_name=f'{container_dim[0]}x{container_dim[1]}x{container_dim[2]}-{run}',
         reset_num_timesteps=False,

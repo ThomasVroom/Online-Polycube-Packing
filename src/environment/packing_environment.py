@@ -14,8 +14,7 @@ class PackingEnv(gym.Env):
             upper_bound: int,
             seq_length: int=100,
             cache_path: str='resources/polycubes',
-            seed: int=None,
-            exp_packed: int=0
+            seed: int=None
         ):
         '''
         Create a packing environment.
@@ -32,8 +31,6 @@ class PackingEnv(gym.Env):
                 the path to the cache of polycubes.
             `seed` : int, optional
                 the seed for the random number generator (used when packing through UI).
-            `exp_packed` : int, optional
-                the expected number of polycubes that will be packed (used to normalize rewards).
         '''
 
         # set the environment variables
@@ -42,7 +39,6 @@ class PackingEnv(gym.Env):
         self.generator = ShapeGenerator(upper_bound, cache_path)
         self.sequence_length = seq_length
         self.seed = seed
-        self.exp_packed = exp_packed
         self.sequence = None
         self.dimensions = container.get_dimensions()
         self.action_space_nvec = np.append([24], self.dimensions)
@@ -133,7 +129,7 @@ class PackingEnv(gym.Env):
         terminated = self.is_terminal()
 
         # get reward
-        reward = 0 if not terminated else (len(self.container.get_ids()) - self.exp_packed)
+        reward = 0 if not terminated else len(self.container.get_ids())
 
         # return the next observation, reward, terminated, truncated and info
         return self._get_obs(), reward, terminated, False, self._get_info()

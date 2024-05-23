@@ -22,5 +22,5 @@ class PPOAgent(Agent):
         action_mask = env.action_masks()
 
         # get action
-        action, _ = self.model.predict(obs, action_masks=action_mask)
+        action, _ = self.model.predict(obs, deterministic=True, action_masks=action_mask)
         return action
