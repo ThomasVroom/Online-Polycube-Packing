@@ -16,10 +16,10 @@ from src.environment import PackingEnv, Container
 from stable_baselines3.common.monitor import Monitor
 import torch
 
-N_TRIALS = 100
-N_STARTUP_TRIALS = 5
+N_TRIALS = 200
+N_STARTUP_TRIALS = 3
 N_EVALUATIONS = 2
-N_TIMESTEPS = int(5e4)
+N_TIMESTEPS = 25000
 EVAL_FREQ = int(N_TIMESTEPS / N_EVALUATIONS)
 N_EVAL_EPISODES = 25
 
@@ -87,14 +87,14 @@ def objective(trial: optuna.Trial) -> float:
     kwargs.update(sample_ppo_params(trial))
 
     # Create environment.
-    env = PackingEnv(Container(4, 4, 4), upper_bound=4, seq_length=25)
-    env.set_heuristics([BLBF(), HAPE()], trial.suggest_categorical("n_heuristics", [25, 50, 100, 150, 200]))
+    env = PackingEnv(Container(3, 3, 3), upper_bound=3, seq_length=15)
+    env.set_heuristics([BLBF(), HAPE()], 25)
     kwargs["env"] = env
 
     # Create the RL model.
     model = MaskablePPO(**kwargs)
     # Create env used for evaluation.
-    eval_env = Monitor(PackingEnv(Container(4, 4, 4), upper_bound=4, seq_length=25))
+    eval_env = Monitor(PackingEnv(Container(3, 3, 3), upper_bound=3, seq_length=15))
     # Create the callback that will periodically evaluate and report the performance.
     eval_callback = TrialEvalCallback(
         eval_env, trial, n_eval_episodes=N_EVAL_EPISODES, eval_freq=EVAL_FREQ, deterministic=True
@@ -131,7 +131,7 @@ if __name__ == "__main__":
 
     study = optuna.create_study(sampler=sampler, pruner=pruner, direction="maximize")
     try:
-        study.optimize(objective, n_trials=N_TRIALS, timeout=600, show_progress_bar=True)
+        study.optimize(objective, n_trials=N_TRIALS, timeout=30000, show_progress_bar=True)
     except KeyboardInterrupt:
         pass
 
