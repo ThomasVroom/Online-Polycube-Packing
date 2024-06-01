@@ -8,18 +8,18 @@ from src.heuristics import *
 if __name__ == '__main__':
 
     # variables
-    container_dim = (4, 4, 4) # dimensions of the container (width, height, depth)
-    run = '' # run number
+    container_dim = (3, 3, 3) # dimensions of the container (width, height, depth)
+    run = '0' # run number
     checkpoint = '' # path to a model to continue training
     heuristics = [BLBF(), HAPE()]
     n = 50 # max size of action space
-    epochs = 1000000 # number of steps to train the model
+    epochs = 500000 # number of steps to train the model
 
     # create environment
     env = PackingEnv(
         Container(container_dim[0], container_dim[1], container_dim[2]),
         upper_bound=max(container_dim),
-        seq_length=25
+        seq_length=15
     )
     env.set_heuristics(heuristics, n)
 
@@ -44,8 +44,8 @@ if __name__ == '__main__':
     model = MaskablePPO(
         policy='MultiInputPolicy',
         env=env,
-        learning_rate=0.0003,
-        n_steps=2500, # number of steps to collect samples for each policy update
+        learning_rate=0.0005,
+        n_steps=64, # number of steps to collect samples for each policy update
         batch_size=64, # number of samples per training batch (policy update)
         n_epochs=10, # number of epochs when updating the policy
         gamma=0.99,
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         clip_range=0.2, # clip range for the policy loss
         clip_range_vf=None, # clip range for the value function
         normalize_advantage=True,
-        ent_coef=0.001, # entropy coefficient for the loss calculation
+        ent_coef=0.005, # entropy coefficient for the loss calculation
         vf_coef=0.5, # value function coefficient for the loss calculation
         max_grad_norm=0.5, # max gradient norm
         rollout_buffer_class=None,
