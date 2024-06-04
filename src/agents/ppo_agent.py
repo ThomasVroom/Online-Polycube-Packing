@@ -18,7 +18,7 @@ class PPOAgent(Agent):
     @override
     def get_action(self, env) -> int:
         # get observation and action mask
-        obs = env._get_obs()
+        obs = env._get_obs_cache()
         action_mask = env.action_masks()
 
         # get action

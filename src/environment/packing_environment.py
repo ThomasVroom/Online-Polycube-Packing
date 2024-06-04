@@ -45,6 +45,7 @@ class PackingEnv(gym.Env):
         self.feasible_positions = None
         self.heuristics = None
         self.heuristics_n = None
+        self.obs_cache = None
 
         # the observation space is defined as the combination of the (current) container and the (next) polycube.
         # the container is represented as a binary tensor, where 1 indicates an occupied cell.
@@ -62,6 +63,18 @@ class PackingEnv(gym.Env):
         # each number encodes a unique rotation and position of the polycube.
         # note that this space is only dependent on the size of the container.
         self.action_space = spaces.Discrete(np.prod(self.action_space_nvec))
+
+    def _get_obs_cache(self) -> dict:
+        '''
+        Translate the current state of the environment to an observation.
+        This method uses a cache of the obervation computed in the previous step,
+        making it faster when used consecutively.
+
+        Returns
+        -------
+            `dict[container, polycube]` : the observation of the environment.
+        '''
+        return self.obs_cache
     
     def _get_obs(self) -> dict:
         '''
@@ -107,9 +120,12 @@ class PackingEnv(gym.Env):
 
         # set the feasible positions
         self.feasible_positions = self.find_feasible_positions()
+
+        # update the observation cache
+        self.obs_cache = self._get_obs()
         
         # return the current observation
-        return self._get_obs(), self._get_info()
+        return self._get_obs_cache(), self._get_info()
 
     @override
     def step(self, action: int):
@@ -131,8 +147,11 @@ class PackingEnv(gym.Env):
         # get reward
         reward = 0 if not terminated else len(self.container.get_ids())
 
+        # update the observation cache
+        self.obs_cache = self._get_obs()
+
         # return the next observation, reward, terminated, truncated and info
-        return self._get_obs(), reward, terminated, False, self._get_info()
+        return self._get_obs_cache(), reward, terminated, False, self._get_info()
     
     def is_terminal(self) -> bool:
         '''
