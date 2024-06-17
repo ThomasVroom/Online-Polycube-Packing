@@ -1,6 +1,6 @@
 # Online-Polycube-Packing
 
-![](1.png)
+![](resources/preview.png)
 
 ## Introduction
 Bin Packing Problems (BPP) are some of the most popular and well-studied combinatorial optimization problems.
