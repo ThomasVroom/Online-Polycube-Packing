@@ -9,8 +9,7 @@ if __name__ == '__main__':
     # set up environment
     c = Container(5, 5, 5)
     env = PackingEnv(c, upper_bound=5, seed=42)
-    agent = GreedyAgent(heuristics=[BLBF(),
-                                    HAPE()])
+    agent = GreedyAgent(heuristics=[BLBF(), HAPE()])
 
     # start the UI
     vis = Visualizer(env, agent=agent)

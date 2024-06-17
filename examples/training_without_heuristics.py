@@ -8,7 +8,7 @@ from src.heuristics import *
 if __name__ == '__main__':
 
     # variables
-    container_dim = (5, 3, 3) # dimensions of the container (width, height, depth)
+    container_dim = (3, 3, 3) # dimensions of the container (width, height, depth)
     run = '0' # run number
     checkpoint = '' # path to a model to continue training
     epochs = 500000 # number of steps to train the model
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     env = PackingEnv(
         Container(container_dim[0], container_dim[1], container_dim[2]),
         upper_bound=max(container_dim),
-        seq_length=25
+        seq_length=10
     )
 
     # create callbacks
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         policy='MultiInputPolicy',
         env=env,
         learning_rate=0.0005,
-        n_steps=128, # number of steps to collect samples for each policy update
+        n_steps=64, # number of steps to collect samples for each policy update
         batch_size=64, # number of samples per training batch (policy update)
         n_epochs=10, # number of epochs when updating the policy
         gamma=0.99,

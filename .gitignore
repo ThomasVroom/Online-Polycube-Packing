@@ -9,9 +9,6 @@ __pycache__/
 # VS Code
 .vscode/
 
-# temporary mute experiments
-experiments/
-
 # Distribution / packaging
 .Python
 build/

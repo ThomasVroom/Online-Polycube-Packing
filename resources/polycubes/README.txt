@@ -1,1 +1,1 @@
-download pre-computed cache files from: https://github.com/mikepound/cubes
+pre-computed cache files from: https://github.com/mikepound/cubes
